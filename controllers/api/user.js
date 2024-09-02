@@ -157,3 +157,23 @@ exports.login = (req,res) =>{
         res.redirect("/login?error=Something went wrong!");
     }
 }
+
+exports.getInfo=(req,res)=>{
+    try {
+        jwt.verify(req.cookies.token,jwtSecret,(err,userPayload)=>{
+            if(err) throw err;
+            const {id,email,username}=userPayload
+       let user={
+        id,
+        username,
+        email,
+        user_rank: req.cookies.user_rank,
+        user_points: req.cookies.user_points
+       }
+       return res.json(user);
+        })
+    } catch (err) {
+        console.log(err)
+        res.status(500).json({error: err.message});
+        }
+    }
