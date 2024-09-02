@@ -1,20 +1,27 @@
-exports.getRegisterPage = (req,res) =>{
-   /* if(req.cookies.token){
-        return res.redirect("/")
-    }*/
-    res.render("auth/register");
+exports.getRegisterPage = (req, res) => {
+  if (req.cookies.token) {
+    return res.redirect("/")
+  }
+  res.render("auth/register")
 }
 
-exports.getLoginPage = (req,res) =>{
-/* if(req.cookies.token){
-        return res.redirect("/")
-    }*/
-    res.render("auth/login");
+exports.getLoginPage = (req, res) => {
+  if (req.cookies.token) {
+    return res.redirect("/")
+  }
+  res.render("auth/login")
 }
 
-exports.getLobbyPage=(req,res)=>{
-/* if(!req.cookies.token){
-        return res.redirect("/login")
-    }*/   // OVO NE RADI
-    res.render("lobby");
+exports.getLobbyPage = (req, res) => {
+  if (!req.cookies.token) {
+    return res.redirect("/login")
+  }
+  res.render("lobby")
+}
+
+exports.getGamesPage = (req, res) => {
+  if (!req.cookies.token) {
+    return res.redirect("/login")
+  }
+  res.render("games")
 }
