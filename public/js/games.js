@@ -2,8 +2,8 @@
 
 const gamesDivElement = document.getElementById("games")
 const rankFilter = document.getElementById("filter")
-const gameList = document.getElementById("game-list")
-const noGamesMessage = document.getElementById("no-games-found")
+const gamesList = document.getElementById("games-list")
+const noGamesMessage = document.getElementById("no-games-message")
 
 const createRoomBtn = document.getElementById("create-room")
 const joinRoomBtn = document.getElementById("join-room")
@@ -34,7 +34,7 @@ let user
 let gameId = null
 
 const intervals = [0, 15, 30, 45, 60]
-
+//Functions
 const fetchUserCallback = (data) => {
   user = data
   socket.emit("user-connected", user)
@@ -44,5 +44,57 @@ const fetchUserCallback = (data) => {
 
   hideSpinner()
 }
+const addJoinButtonListeners =()=>{
+document.querySelectorAll(".game button").forEach(button =>{
+  if(!button.classList.contains("disabled")){
+    button.addEventListener("click", e=>{
+      let game=button.parentNode;
+
+     if(game.dataset.withpassword === 'true'){
+      gameId=game.id;
+      joinRoomFormContainer.classList.remove('hidden');
+     }else{
+      socket.emit('join-room',game.id,user);
+     }
+    })
+  }
+})
+}
+const displayRooms =rooms=>{
+gamesList.innerHTML="";
+
+rooms.forEach(room=>{
+let {username, user_rank} =room.players[0];
+let numberOfPlayersInRoom=room.players[1] ? 2:1; //postavlja broj igraca na 2 ako postoji drugi igrac, odnosno na 1 ako ne postoji
+let hasPassword=room.password && room.password!="" ? true:false //hasPassword će biti true ako room.password postoji i nije prazan string (""), što znači da je soba zaštićena lozinkom
+
+gamesList.innerHTML+=`
+<li class='game' id='${room.id}' data-withpassword="${hasPassword}">
+<div class="user">
+<span>${username}</span>
+<span>( ${user_rank.charAt(0).toUpperCase()+user_rank.slice(1)})</span>
+</div>
+<div class="users-in-room">${numberOfPlayersInRoom} / 2</div> 
+
+<button ${numberOfPlayersInRoom===2 ? "class='disabled'" : ""}>Join</button>
+</li>
+`
+})
+addJoinButtonListeners()
+}
 
 fetchData("/api/user-info", fetchUserCallback)
+
+//Listeners
+
+socket.on('receive-rooms', rooms=>{
+  if(rooms.length>0){
+noGamesMessage.classList.add("hidden");
+gamesList.classList.remove("hidden");
+
+displayRooms(rooms);
+  }else{
+    gamesList.classList.add("hidden");
+    noGamesMessage.classList.remove("hidden");
+  }
+})

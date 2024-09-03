@@ -15,6 +15,7 @@ dotenv.config();
 const viewRoutes = require("./routes/views");
 const userRoutes = require("./routes/api/user");
 const { Socket } = require('dgram');
+const { createTestingRooms } = require('./util/room');
 
 const app = express();
 
@@ -77,6 +78,25 @@ socket.on("send-message",(message,user,roomId=null)=>{
         socket.broadcast.emit("receive-message",message,user,true);
     }
 })
+
+
+socket.on('get-rooms', (rank) => {
+    createTestingRooms();
+    redisClient.get('rooms', (err, reply) => {
+        if (err) throw err;
+        if (reply) {
+            let rooms = JSON.parse(reply);
+            if (rank === 'all') {
+                socket.emit("receive-rooms", rooms); //prikazujemo sve sobe bez filtriranja
+            } else {
+                let filteredRooms = rooms.filter(room => room.players[0].user_rank === rank); //filtriramo sobe po ranku. prolazimo kroz sve sobe i zadrzavamo one gde je rank prvog igraca u sobi jednak ranku koji je prosledjen iz klijenta
+                socket.emit("receive-rooms", filteredRooms); //salje klijentu sve sobe kroz dogadjaj receive rooms
+            }
+        } else {
+            socket.emit("receive-rooms", []); //prazna soba
+        }
+    });
+});
 
 socket.on("send-message",(message,user,roomId=null)=>{
     if(roomId){
