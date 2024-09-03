@@ -159,214 +159,236 @@ const { json } = require("express");
 const redisClient = require("../config/redis");
 
 let numberOfRoomIndices = {
-    'beginner': 0,
-    'intermediate': 1,
-    'advanced': 2,
-    'expert': 3
+  beginner: 0,
+  intermediate: 1,
+  advanced: 2,
+  expert: 3,
 };
 
 const createRoom = (roomId, user, time, password = null) => {
-    let room = { id: roomId, players: [null, null], moves: [], time, gameStarted: false };
-    room.players[0] = user;
+  let room = {
+    id: roomId,
+    players: [null, null],
+    moves: [],
+    time,
+    gameStarted: false,
+  };
+  room.players[0] = user;
 
-    if (password) {
-        room.password = password;
+  if (password) {
+    room.password = password;
+  }
+
+  console.log("Kreirana soba:", room);
+
+  redisClient.set(roomId, JSON.stringify(room), (err) => {
+    if (err) throw err;
+    console.log(`Soba ${roomId} je dodata u Redis`);
+  });
+
+  // Ažuriranje liste svih soba
+  redisClient.get("rooms", (err, reply) => {
+    if (err) throw err;
+    let rooms;
+    let index;
+    if (reply) {
+      rooms = JSON.parse(reply);
+      index = rooms.length;
+      rooms.push(room);
+    } else {
+      index = 0;
+      rooms = [room];
     }
-
-    console.log('Kreirana soba:', room);
-
-    redisClient.set(roomId, JSON.stringify(room), (err) => {
-        if (err) throw err;
-        console.log(`Soba ${roomId} je dodata u Redis`);
+    redisClient.set("rooms", JSON.stringify(rooms), (err) => {
+      if (err) throw err;
+      console.log(`Lista soba ažurirana:`, rooms);
     });
 
-    // Ažuriranje liste svih soba
-    redisClient.get('rooms', (err, reply) => {
-        if (err) throw err;
-        let rooms;
-        let index;
-        if (reply) {
-            rooms = JSON.parse(reply);
-            index = rooms.length;
-            rooms.push(room);
-        } else {
-            index = 0;
-            rooms = [room];
-        }
-        redisClient.set('rooms', JSON.stringify(rooms), (err) => {
-            if (err) throw err;
-            console.log(`Lista soba ažurirana:`, rooms);
-        });
-
-        redisClient.get('roomIndices', (err, reply) => {
-            let roomIndices;
-            if (reply) {
-                roomIndices = JSON.parse(reply);
-            } else {
-                roomIndices = {};
-            }
-            roomIndices[`${roomId}`] = index;
-            redisClient.set('roomIndices', JSON.stringify(roomIndices));
-        });
+    redisClient.get("roomIndices", (err, reply) => {
+      let roomIndices;
+      if (reply) {
+        roomIndices = JSON.parse(reply);
+      } else {
+        roomIndices = {};
+      }
+      roomIndices[`${roomId}`] = index;
+      redisClient.set("roomIndices", JSON.stringify(roomIndices));
     });
+  });
 
-    // Ažuriranje ukupnog broja soba
-    redisClient.get('total-rooms', (err, reply) => {
+  // Ažuriranje ukupnog broja soba
+  redisClient.get("total-rooms", (err, reply) => {
+    if (err) throw err;
+    if (reply) {
+      let totalRooms = parseInt(reply);
+      totalRooms += 1;
+      redisClient.set("totalRooms", totalRooms + "", (err) => {
         if (err) throw err;
-        if (reply) {
-            let totalRooms = parseInt(reply);
-            totalRooms += 1;
-            redisClient.set('totalRooms', totalRooms + "", (err) => {
-                if (err) throw err;
-                console.log('Ukupan broj soba je ažuriran:', totalRooms);
-            });
-        } else {
-            redisClient.set('totalRooms', "1", (err) => {
-                if (err) throw err;
-                console.log('Ukupan broj soba je postavljen na 1');
-            });
-        }
-    });
+        console.log("Ukupan broj soba je ažuriran:", totalRooms);
+      });
+    } else {
+      redisClient.set("totalRooms", "1", (err) => {
+        if (err) throw err;
+        console.log("Ukupan broj soba je postavljen na 1");
+      });
+    }
+  });
 
-    // Ažuriranje broja soba po korisničkom rangu
-    redisClient.get('number-of-rooms', (err, reply) => {
-        if (err) throw err;
-        let numberOfRooms = [0, 0, 0, 0];
-        if (reply) {
-            numberOfRooms = JSON.parse(reply);
-        }
-        numberOfRooms[numberOfRoomIndices[user.user_rank]] += 1;
-        redisClient.set('number-of-rooms', JSON.stringify(numberOfRooms), (err) => {
-            if (err) throw err;
-            console.log('Broj soba po rangu je ažuriran:', numberOfRooms);
-        });
+  // Ažuriranje broja soba po korisničkom rangu
+  redisClient.get("number-of-rooms", (err, reply) => {
+    if (err) throw err;
+    let numberOfRooms = [0, 0, 0, 0];
+    if (reply) {
+      numberOfRooms = JSON.parse(reply);
+    }
+    numberOfRooms[numberOfRoomIndices[user.user_rank]] += 1;
+    redisClient.set("number-of-rooms", JSON.stringify(numberOfRooms), (err) => {
+      if (err) throw err;
+      console.log("Broj soba po rangu je ažuriran:", numberOfRooms);
     });
+  });
 };
 
 const joinRoom = (roomId, user) => {
-    redisClient.get(roomId, (err, reply) => {
+  redisClient.get(roomId, (err, reply) => {
+    if (err) throw err;
+
+    if (reply) {
+      let room = JSON.parse(reply);
+      room.players[1] = user;
+
+      redisClient.set(roomId, JSON.stringify(room), (err) => {
+        if (err) throw err;
+        console.log(`Korisnik je dodan u sobu ${roomId}:`, room);
+      });
+
+      redisClient.get("roomIndices", (err, reply) => {
         if (err) throw err;
 
         if (reply) {
-            let room = JSON.parse(reply);
-            room.players[1] = user;
+          let roomIndices = JSON.parse(reply);
 
-            redisClient.set(roomId, JSON.stringify(room), (err) => {
+          redisClient.get("rooms", (err, reply) => {
+            if (err) throw err;
+            if (reply) {
+              let rooms = JSON.parse(reply);
+              rooms[roomIndices[roomId]].players[1] = user;
+              redisClient.set("rooms", JSON.stringify(rooms), (err) => {
                 if (err) throw err;
-                console.log(`Korisnik je dodan u sobu ${roomId}:`, room);
-            });
-
-            redisClient.get('roomIndices', (err, reply) => {
-                if (err) throw err;
-
-                if (reply) {
-                    let roomIndices = JSON.parse(reply);
-
-                    redisClient.get('rooms', (err, reply) => {
-                        if (err) throw err;
-                        if (reply) {
-                            let rooms = JSON.parse(reply);
-                            rooms[roomIndices[roomId]].players[1] = user;
-                            redisClient.set('rooms', JSON.stringify(rooms), (err) => {
-                                if (err) throw err;
-                                console.log('Ažurirana lista soba nakon pridruživanja korisnika:', rooms);
-                            });
-                        }
-                    });
-                }
-            });
+                console.log(
+                  "Ažurirana lista soba nakon pridruživanja korisnika:",
+                  rooms
+                );
+              });
+            }
+          });
         }
-    });
+      });
+    }
+  });
 };
 
 const removeRoom = (roomId, userRank) => {
-    redisClient.del(roomId, (err) => {
-        if (err) throw err;
-        console.log(`Soba ${roomId} je obrisana iz Redis`);
-    });
+  redisClient.del(roomId, (err) => {
+    if (err) throw err;
+    console.log(`Soba ${roomId} je obrisana iz Redis`);
+  });
 
-    redisClient.get('roomIndices', (err, reply) => {
-        if (err) throw err;
+  redisClient.get("roomIndices", (err, reply) => {
+    if (err) throw err;
 
-        if (reply) {
-            let roomIndices = JSON.parse(reply);
+    if (reply) {
+      let roomIndices = JSON.parse(reply);
 
-            redisClient.get('rooms', (err, reply) => {
-                if (err) throw err;
-                if (reply) {
-                    let rooms = JSON.parse(reply);
-                    rooms.splice(roomIndices[roomId], 1);
-                    delete roomIndices[roomId];
-                    redisClient.set('rooms', JSON.stringify(rooms), (err) => {
-                        if (err) throw err;
-                        console.log('Lista soba ažurirana nakon brisanja sobe:', rooms);
-                    });
-                    redisClient.set('roomIndices', JSON.stringify(roomIndices));
-                }
-            });
-        }
-    });
-
-    redisClient.get('total-rooms', (err, reply) => {
+      redisClient.get("rooms", (err, reply) => {
         if (err) throw err;
         if (reply) {
-            let totalRooms = parseInt(reply);
-            totalRooms -= 1;
-            redisClient.set('totalRooms', totalRooms + "", (err) => {
-                if (err) throw err;
-                console.log('Ukupan broj soba je smanjen:', totalRooms);
-            });
+          let rooms = JSON.parse(reply);
+          rooms.splice(roomIndices[roomId], 1);
+          delete roomIndices[roomId];
+          redisClient.set("rooms", JSON.stringify(rooms), (err) => {
+            if (err) throw err;
+            console.log("Lista soba ažurirana nakon brisanja sobe:", rooms);
+          });
+          redisClient.set("roomIndices", JSON.stringify(roomIndices));
         }
-    });
+      });
+    }
+  });
 
-    redisClient.get('number-of-rooms', (err, reply) => {
+  redisClient.get("total-rooms", (err, reply) => {
+    if (err) throw err;
+    if (reply) {
+      let totalRooms = parseInt(reply);
+      totalRooms -= 1;
+      redisClient.set("totalRooms", totalRooms + "", (err) => {
         if (err) throw err;
-        if (reply) {
-            let numberOfRooms = JSON.parse(reply);
-            numberOfRooms[numberOfRoomIndices[userRank]] -= 1;
-            redisClient.set('number-of-rooms', JSON.stringify(numberOfRooms), (err) => {
-                if (err) throw err;
-                console.log('Broj soba po rangu smanjen:', numberOfRooms);
-            });
+        console.log("Ukupan broj soba je smanjen:", totalRooms);
+      });
+    }
+  });
+
+  redisClient.get("number-of-rooms", (err, reply) => {
+    if (err) throw err;
+    if (reply) {
+      let numberOfRooms = JSON.parse(reply);
+      numberOfRooms[numberOfRoomIndices[userRank]] -= 1;
+      redisClient.set(
+        "number-of-rooms",
+        JSON.stringify(numberOfRooms),
+        (err) => {
+          if (err) throw err;
+          console.log("Broj soba po rangu smanjen:", numberOfRooms);
         }
-    });
+      );
+    }
+  });
 };
 
 const createTestingRooms = async () => {
-    try {
-        const rooms = [
-            {
-                id: 'room1',
-                players: [
-                    { username: 'testuser', user_rank: 'beginner', user_points: 1000, room: 'room1' },
-                    null
-                ],
-                moves: [],
-                time: 0,
-                gameStarted: false
-            },
-            {
-                id: 'room2',
-                players: [
-                    { username: 'testuser2', user_rank: 'expert', user_points: 1000, room: 'room2' },
-                    null
-                ],
-                moves: [],
-                time: 0,
-                gameStarted: false,
-                password: 'password'
-            }
-        ];
+  try {
+    const rooms = [
+      {
+        id: "room1",
+        players: [
+          {
+            username: "testuser",
+            user_rank: "beginner",
+            user_points: 1000,
+            room: "room1",
+          },
+          null,
+        ],
+        moves: [],
+        time: 0,
+        gameStarted: false,
+      },
+      {
+        id: "room2",
+        players: [
+          {
+            username: "testuser2",
+            user_rank: "expert",
+            user_points: 1000,
+            room: "room2",
+          },
+          null,
+        ],
+        moves: [],
+        time: 0,
+        gameStarted: false,
+        password: "password",
+      },
+    ];
 
-        console.log('Creating rooms:', rooms); // Proveri da li se sobe kreiraju kako treba
+    console.log("Creating rooms:", rooms); // Proveri da li se sobe kreiraju kako treba
 
-        await redisClient.set('rooms', JSON.stringify(rooms));
+    await redisClient.set("rooms", JSON.stringify(rooms));
 
-        console.log('Rooms saved to Redis'); // Proveri da li se sobe pravilno čuvaju u Redis
-    } catch (err) {
-        console.error('Error creating rooms:', err);
-    }
+    console.log("Rooms saved to Redis"); // Proveri da li se sobe pravilno čuvaju u Redis
+  } catch (err) {
+    console.error("Error creating rooms:", err);
+  }
 };
-
 
 module.exports = { createRoom, joinRoom, removeRoom, createTestingRooms };
