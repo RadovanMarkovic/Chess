@@ -1,4 +1,4 @@
-const express = require('express');
+/*const express = require('express');
 const dotenv = require('dotenv');
 const db = require("./config/db");
 const path = require("path");
@@ -15,6 +15,7 @@ dotenv.config();
 const viewRoutes = require("./routes/views");
 const userRoutes = require("./routes/api/user");
 const { Socket } = require('dgram');
+const { createTestingRooms } = require('./util/room');
 
 const app = express();
 
@@ -78,6 +79,25 @@ socket.on("send-message",(message,user,roomId=null)=>{
     }
 })
 
+
+socket.on('get-rooms', (rank) => {
+    createTestingRooms();
+    redisClient.get('rooms', (err, reply) => {
+        if (err) throw err;
+        if (reply) {
+            let rooms = JSON.parse(reply);
+            if (rank === 'all') {
+                socket.emit("receive-rooms", rooms); //prikazujemo sve sobe bez filtriranja
+            } else {
+                let filteredRooms = rooms.filter(room => room.players[0].user_rank === rank); //filtriramo sobe po ranku. prolazimo kroz sve sobe i zadrzavamo one gde je rank prvog igraca u sobi jednak ranku koji je prosledjen iz klijenta
+                socket.emit("receive-rooms", filteredRooms); //salje klijentu sve sobe kroz dogadjaj receive rooms
+            }
+        } else {
+            socket.emit("receive-rooms", []); //prazna soba
+        }
+    });
+});
+
 socket.on("send-message",(message,user,roomId=null)=>{
     if(roomId){
         socket.to(roomId).emit("receive-message",message,user);
@@ -112,4 +132,144 @@ const PORT = parseInt(process.env.PORT) || 5000;
 
 server.listen(PORT, () => {
     console.log(`Server started at http://localhost:${PORT}`);
-})
+})*/
+const express = require('express');
+const dotenv = require('dotenv');
+const db = require("./config/db");
+const path = require("path");
+const http = require("http");
+const socketIO = require("socket.io");
+const cookieParser = require('cookie-parser');
+const redisClient = require('./config/redis');
+
+const { newUser, removeUser } = require("./util/user");
+const { createTestingRooms } = require('./util/room');
+dotenv.config();
+
+// Routes
+const viewRoutes = require("./routes/views");
+const userRoutes = require("./routes/api/user");
+
+const app = express();
+
+const server = http.createServer(app);
+
+// Povezivanje na MySQL bazu podataka
+db.connect((err) => {
+    if (err) {
+        console.log(err);
+        process.exit(1);
+    }
+    console.log("Connecting to MySQL database");
+});
+
+// Postavljanje aplikacije da koristi ejs i statičke fajlove
+app.use(cookieParser("secret"));
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.use(express.static(path.join(__dirname, "public")));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Rute za aplikaciju
+app.use("/", viewRoutes);
+app.use("/api", userRoutes);
+
+// Socket.IO inicijalizacija
+const io = socketIO(server);
+
+io.on("connection", (socket) => {
+    socket.on('user-connected', async (user, roomId = null) => {
+        if (roomId) {
+            // TODO: Join with room ID
+        } else {
+            await newUser(socket.id, user);
+        }
+    });
+
+    socket.on('send-total-rooms-and-users', async () => {
+        try {
+            const totalUsersReply = await redisClient.get('total-users');
+            const totalUsers = totalUsersReply ? parseInt(totalUsersReply) : 0;
+
+            const totalRoomsReply = await redisClient.get('total-rooms');
+            const totalRooms = totalRoomsReply ? parseInt(totalRoomsReply) : 0;
+
+            const numberOfRoomsReply = await redisClient.get('number-of-rooms');
+            const numberOfRooms = numberOfRoomsReply ? JSON.parse(numberOfRoomsReply) : [0, 0, 0, 0];
+
+            socket.emit('receive-number-of-rooms-and-users', numberOfRooms, totalRooms, totalUsers);
+        } catch (err) {
+            console.error('Error fetching data from Redis:', err);
+        }
+    });
+
+    socket.on('get-rooms', async (rank) => {
+        console.log('Fetching rooms');
+        await createTestingRooms(); // Obezbedi da se sobe pravilno kreiraju
+    
+        redisClient.get('rooms', (err, reply) => {
+            if (err) {
+                console.error('Error fetching rooms from Redis:', err);
+                return;
+            }
+            console.log('Received rooms from Redis:', reply); // Proveri da li Redis vraća podatke
+    
+            if (reply) {
+                let rooms = JSON.parse(reply);
+                if (rank === 'all') {
+                    socket.emit("receive-rooms", rooms);
+                } else { 
+                    // Filtriranje soba na osnovu rank-a
+                    let filteredRooms = rooms.filter(room => room.players[0].user_rank === rank);
+                    socket.emit("receive-rooms", filteredRooms); // Pošalji filtrirane sobe klijentu
+                }
+            } else {
+                socket.emit("receive-rooms", []); // Prazan niz ako nema soba
+            }
+        });
+    });
+    
+
+    socket.on("send-message", (message, user, roomId = null) => {
+        if (roomId) {
+            socket.to(roomId).emit("receive-message", message, user);
+        } else {
+            socket.broadcast.emit("receive-message", message, user, true);
+        }
+    });
+
+    socket.on("disconnect", async () => {
+        let socketId = socket.id;
+
+        try {
+            const reply = await redisClient.get(socketId);
+
+            if (reply) {
+                let user = JSON.parse(reply);
+
+                if (user.room) {
+                    // TODO: Remove user's room and also remove user from the room
+                }
+            }
+
+            await removeUser(socketId);
+        } catch (err) {
+            console.error('Error during disconnect:', err);
+        }
+    });
+});
+
+// Pokretanje servera
+const PORT = parseInt(process.env.PORT) || 5000;
+
+server.listen(PORT, () => {
+    console.log(`Server started at http://localhost:${PORT}`);
+});
+
+// Handluj zatvaranje servera
+process.on('SIGINT', async () => {
+    console.log("Shutting down server...");
+    await redisClient.quit();
+    process.exit(0);
+});
