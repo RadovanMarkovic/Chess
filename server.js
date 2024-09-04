@@ -126,9 +126,9 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("join-random", (user) => {
-    redisClient.get("rooms", (err, reply) => {
-      if (err) throw err;
+  socket.on("join-random", async (user) => {
+    try {
+      const reply = await redisClient.get("rooms");
 
       if (reply) {
         let rooms = JSON.parse(reply);
@@ -138,7 +138,7 @@ io.on("connection", (socket) => {
         );
 
         if (room) {
-          joinRoom(room.id, user);
+          await joinRoom(room.id, user); // Dodano await za asinhroni poziv
           socket.emit("room-joined", room.id);
         } else {
           socket.emit("error", "No room found!");
@@ -146,7 +146,10 @@ io.on("connection", (socket) => {
       } else {
         socket.emit("error", "No room found!");
       }
-    });
+    } catch (err) {
+      console.error("Error joining random room:", err);
+      socket.emit("error", "An error occurred while joining a random room.");
+    }
   });
 
   socket.on("get-rooms", async (rank) => {
