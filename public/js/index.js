@@ -13,3 +13,7 @@ const fetchData=(url, callback)=>{ //funkcija fetchData koristi fetch API za sla
     .catch(err=> console.log(err.message)) 
 }
 
+socket.on("error", (errorMessage)=>{
+    window.location.href="http://localhost:5000/games?error="+errorMessage
+})
+
