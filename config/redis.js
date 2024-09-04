@@ -1,6 +1,5 @@
 const redis = require("redis");
 const dotenv = require("dotenv");
-
 dotenv.config();
 
 //trenutno cemo koristiti localhost, al kasnije kad pomocu dokera napravimo server tad cemo REDIS_HOST  

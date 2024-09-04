@@ -14,3 +14,7 @@ const fetchData = (url, callback) => {
     .then(callback) //Kada se JSON podaci dobiju, callback funkcija se poziva sa ovim podacima kao argumentom
     .catch((err) => console.log(err.message));
 };
+
+socket.on("error", (errorMessage) => {
+  window.location.href = "http://localhost:5000/games?error=" + errorMessage;
+});
