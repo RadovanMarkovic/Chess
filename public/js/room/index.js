@@ -1,7 +1,7 @@
 //====================================
 //DOM ELEMENTS
 //====================================
-const room = document.getElementById("game-rooms")
+const room = document.getElementById("game-room")
 const boxes = document.querySelectorAll(".box")
 const playerLight = document.getElementById("player-light")
 const playerBlack = document.getElementById("player-black")
@@ -31,7 +31,7 @@ let gameDetails = null
 
 let gameHasTimer = false
 let timer = null
-let myTurn = false
+let myTurn = true
 let kingIsAttacked = false
 let pawnToPromotePosition = null
 let castling = null
@@ -64,8 +64,9 @@ const fetchUserCallback = (data) => {
   socket.emit("get-game-details", roomId, user)
 }
 
-fetchUserCallback("/api/user-info", fetchUserCallback)
+fetchData("/api/user-info", fetchUserCallback)
 
+//Display chess board logic
 const displayChessPieces = () => {
   boxes.forEach((box) => {
     box.innerHTML = ""
@@ -87,7 +88,91 @@ const displayChessPieces = () => {
             </div>
             `
   })
+  addPieceListeners()
 }
+
+const onClickPiece = (e) => {
+  if (!myTurn || gameOver) {
+    return
+  }
+  hidePossibleMoves()
+
+  let element = e.target.closest(".piece")
+  //pozicija se skladisti kao id u divu
+  let position = element.parentNode.id
+  let piece = element.dataset.piece //element.dataset: predstavlja specijalni objekat u JavaScript-u koji sadrži sve podatke definisane putem HTML atributa koji počinju sa data-. Na primer, ako HTML element ima atribut data-piece, onda se tom atributu može pristupiti kroz dataset.piece.
+
+  //Ako kliknemo na neku figuru, hocemo da vidimo sve moguce poteze, a ako kliknemo opet onda hocemo da sakrijemo poteze i odselektujemo figuru
+  if (
+    selectedPiece &&
+    selectedPiece.piece === piece &&
+    selectedPiece.position === position
+  ) {
+    hidePossibleMoves()
+    selectedPiece = null
+    return
+  }
+
+  selectedPiece = { position, piece }
+
+  let possibleMoves = findPossibleMoves(position, piece)
+
+  showPossibleMoves(possibleMoves)
+}
+const addPieceListeners = () => {
+  //player ce biti ili beli ili crni
+  document.querySelectorAll(`.piece.${player}`).forEach((piece) => {
+    piece.addEventListener("click", onClickPiece)
+  })
+
+  document.querySelectorAll(`.piece.${enemy}`).forEach((piece) => {
+    //Da ne bi imali hover na kursoru na protivnickim figurama
+    piece.style.cursor = "default"
+  })
+}
+
+//-----------------------------------------
+
+//Possible Moves Logic
+
+const showPossibleMoves = (possibleMoves) => {
+  possibleMoves.forEach((box) => {
+    let possibleMoveBox = document.createElement("div")
+    possibleMoveBox.classList.add("possible-move")
+
+    //possibleMoveBox.addEventListener("click",move)
+
+    box.appendChild(possibleMoveBox) //Dodaje novi html element kao dete postojecem box
+  })
+}
+
+const hidePossibleMoves = () => {
+  document.querySelectorAll(".possible-move").forEach((possibleMoveBox) => {
+    let parent = possibleMoveBox.parentNode
+    //possibleMoveBox.addEventListener("click",move)
+    parent.removeChild(possibleMoveBox)
+  })
+}
+
+const findPossibleMoves = (position, piece) => {
+  let splittedPos = position.split("-")
+  let yAxisPos = parseInt(splittedPos[1])
+
+  let xAxisPos = splittedPos[0]
+  //A-8 -> y=8, x=A
+
+  let yAxisIndex = yAxis.findIndex((y) => y === yAxisPos) //yAxis je iz chessBoarda niz sa svim mogucim vrednostima, i on trazi onaj indeks za koji je y===yAxisPos
+
+  let xAxisIndex = xAxis.findIndex((x) => x === xAxisPos)
+
+  switch (piece) {
+    case "pawn":
+      return getPawnPossibleMoves(xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) // Ova fja ce vratiti niz sa svim mogucim potezima
+    default:
+      return []
+  }
+}
+//-----------------------------------------
 
 const updateTimer = () => {}
 
@@ -112,7 +197,8 @@ displayChessPieces()
 //====================================
 //Socket Listeners
 //===============================
-socket.on("recieve-game-details", (details) => {
+
+socket.on("receive-game-details", (details) => {
   gameDetails = details
 
   let playerOne = gameDetails.players[0]
