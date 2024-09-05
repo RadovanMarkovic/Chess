@@ -37,6 +37,7 @@ const createRoom = async (roomId, user, time, password = null) => {
     if (reply) {
       roomIndices = JSON.parse(reply);
     }
+    x;
     roomIndices[roomId] = index;
     await redisClient.set("roomIndices", JSON.stringify(roomIndices));
 
@@ -100,8 +101,11 @@ const removeRoom = async (roomId, userRank) => {
       if (reply) {
         let rooms = JSON.parse(reply);
 
+        //uklanjamo sobu iz rooms na osnovu dobijenog indeksa preko ID-a
         rooms.splice(roomIndices[roomId], 1);
+        //uklanjamo referencu u indeksima na tu sobu sto je bila
         delete roomIndices[roomId];
+
         await redisClient.set("rooms", JSON.stringify(rooms));
         await redisClient.set("roomIndices", JSON.stringify(roomIndices));
       }
