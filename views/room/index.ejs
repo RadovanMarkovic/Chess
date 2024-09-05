@@ -1,8 +1,8 @@
 <%- include('../include/header')%>
 <div class="container">
-  <-include('../include/partials/spinner')%>
+  <%-include('../include/partials/spinner')%>
 
-  <div class="game-room" id="game-room">
+  <div class="game-room hidden" id="game-room">
     <div class="board-and-users">
       <div class="user" id="player-light">
         <span class="username">testuser1</span>
@@ -96,18 +96,26 @@
       </p>
     </div>
 
-    <div class="captured-piaces">
+    <div class="captured-pieces">
       <div class="captured-container">
-        <h4>Piaces Captured:</h4>
-        <ul class="piaces" id="black-captured-piaces"></ul>
+        <h4>Pieces Captured:</h4>
+        <ul class="pieces" id="black-captured-pieces"></ul>
       </div>
 
       <div class="captured-container">
-        <h4>Piaces Captured:</h4>
-        <ul class="piaces" id="light-captured-piaces"></ul>
+        <h4>Pieces Captured:</h4>
+        <ul class="pieces" id="light-captured-pieces"></ul>
       </div>
     </div>
   </div>
 </div>
 
+<%- include('../include/partials/chat')%>
+<script src="/socket.io/socket.io.js"></script>
+<script src="js/index.js"></script>
+<script src="js/spinner.js"></script>
+<script src="js/room/chessBoard.js"></script>
+<script src="js/room/Timer.js"></script>
+<script src="js/room/index.js"></script>
+<script src="js/chat.js"></script>
 <%- include('../include/footer')%>
