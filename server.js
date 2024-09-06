@@ -63,7 +63,11 @@ io.on("connection", (socket) => {
           await newUser(socket.id, user, roomId);
 
           if (room.players[0].username === user.username) {
+<<<<<<< HEAD
             return;
+=======
+            return
+>>>>>>> b36422516162a73537ba37ca02348fb325d9d7f0
           }
 
           if (!room.players[1]) {
@@ -262,6 +266,7 @@ io.on("connection", (socket) => {
       if (reply) {
         let user = JSON.parse(reply);
         if (user.room) {
+<<<<<<< HEAD
           redisClient.get(user.room, (err, reply) => {
             if (err) throw err;
 
@@ -276,6 +281,18 @@ io.on("connection", (socket) => {
             }
           });
           await removeRoom(user.room, user.user_rank);
+=======
+          const roomReply = await redisClient.get(user.room)
+          if (roomReply) {
+            let room = JSON.parse(reply)
+            if (!room.gameFinished && room.players.length > 1) {
+              io.to(user.room).emit("error", "The other player left the game")
+              return
+            }
+          }
+
+          await removeRoom(user.room, user.user_rank)
+>>>>>>> b36422516162a73537ba37ca02348fb325d9d7f0
         }
       }
       await removeUser(socket.id);
