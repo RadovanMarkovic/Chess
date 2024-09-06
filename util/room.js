@@ -90,6 +90,13 @@ const joinRoom = async (roomId, user) => {
 
 const removeRoom = async (roomId, userRank) => {
   try {
+    reply = await redisClient.get("rooms")
+    if (reply) {
+      let room = JSON.parse(reply)
+      if (room.players.length > 1) {
+        return
+      }
+    }
     await redisClient.del(roomId)
 
     let reply = await redisClient.get("roomIndices")

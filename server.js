@@ -323,16 +323,15 @@ io.on("connection", (socket) => {
       if (reply) {
         let user = JSON.parse(reply)
         if (user.room) {
-          redisClient.get(user.room, (err, reply) => {
-            if (err) throw err
-
-            if (reply) {
-              let room = JSON.parse(reply)
-              if (!room.gameFinished) {
-                io.to(user.room).emit("error", "The other player left the game")
-              }
+          const roomReply = await redisClient.get(user.room)
+          if (roomReply) {
+            let room = JSON.parse(reply)
+            if (!room.gameFinished && room.players.length > 1) {
+              io.to(user.room).emit("error", "The other player left the game")
+              return
             }
-          })
+          }
+
           await removeRoom(user.room, user.user_rank)
         }
       }
