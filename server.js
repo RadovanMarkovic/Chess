@@ -39,67 +39,6 @@ app.use("/api", require("./routes/api/user"));
 const io = socketIO(server);
 
 io.on("connection", (socket) => {
-  //   socket.on("user-connected", async (user, roomId = null, password=null) => {
-  //     if (roomId) {
-  //         ///////////////
-  //       await redisClient.get(roomId,(err,reply)=>{
-  //         if(err) throw err
-
-  //         if(reply){
-  //             let room=JSON.parse(reply)
-
-  //             if(room.gameStarted){
-  //                 socket.emit("error","The room is full")
-  //                 return;
-  //             }
-  //             //Ako soba ima pasvord i ako je pasvord null(nije prosledjen) ili nije dobar, baci err
-  //             if(room.password && (!password || room.password!==password)){
-  //                 socket.emit("error", "To join the room you need the correct password")
-  //                 return
-  //             }
-
-  //             socket.join(roomId)
-  //             newUser(socket.id,user,roomId)
-
-  //             if(room.players[0].username=user.name){
-  //                 return
-  //             }
-
-  //             if(room.players[1]===null){
-  //                 room.players[1]= user
-  //             }
-  //             room.gameStarted = true;
-  //             ////////
-  //             redisClient.set(roomId, JSON.stringify(room))
-  //             socket.to(roomId).emit("game-started")
-  //             /////////
-  //             redisClient.get("roomIndices",(err,reply)=>{
-  //                 if(err)throw err
-
-  //                 if(reply){
-  //                     let roomIndices=JSON.parse(reply)
-  //                     ////////////
-  //                     redisClient.get("rooms",(err,reply)=>{
-  //                         if(reply){
-  //                             let rooms=JSON.parse(reply)
-
-  //                             rooms[roomIndices[roomId]]=room
-
-  //                             ///////////
-  //                             redisClient.set("rooms",JSON.stringify(rooms))
-  //                         }
-  //                     })
-  //                 }
-  //             })
-  //         }else{
-  //             socket.emit("error","The room does not exist")
-  //         }
-  //       })
-  //     } else {
-  //       await newUser(socket.id, user)
-  //     }
-  //   })
-
   socket.on("user-connected", async (user, roomId = null, password = null) => {
     try {
       if (roomId) {
@@ -123,7 +62,7 @@ io.on("connection", (socket) => {
           socket.join(roomId);
           await newUser(socket.id, user, roomId);
 
-          if (room.players[0].username === user.name) {
+          if (room.players[0].username === user.username) {
             return;
           }
 

@@ -1,15 +1,15 @@
 //====================================
 //DOM ELEMENTS
 //====================================
-const room = document.getElementById("game-room")
-const boxes = document.querySelectorAll(".box")
-const playerLight = document.getElementById("player-light")
-const playerBlack = document.getElementById("player-black")
-const waitingMessage = document.getElementById("waiting-message")
-const playerLightTimer = playerLight.querySelector(".timer")
-const playerBlackTimer = playerBlack.querySelector(".timer")
-const lightCapturedPieces = document.getElementById("light-captured-pieces")
-const blackCapturedPieces = document.getElementById("black-captured-pieces")
+const room = document.getElementById("game-room");
+const boxes = document.querySelectorAll(".box");
+const playerLight = document.getElementById("player-light");
+const playerBlack = document.getElementById("player-black");
+const waitingMessage = document.getElementById("waiting-message");
+const playerLightTimer = playerLight.querySelector(".timer");
+const playerBlackTimer = playerBlack.querySelector(".timer");
+const lightCapturedPieces = document.getElementById("light-captured-pieces");
+const blackCapturedPieces = document.getElementById("black-captured-pieces");
 //const piecesToPromoteContainer = document.getElementById("pieces-to-promote-container") Ovu ce valjda ubaciti u ejs, kaze da ce ovde praviti error ali hoce da ih ima sve na jednom mestu
 //const piecesToPromote = document.getElementById("pieces-to-promote")
 //const gameOverMessageContainer = document.getElementById("game-over-message-container")
@@ -21,33 +21,31 @@ const blackCapturedPieces = document.getElementById("black-captured-pieces")
 //GAME VARIABLES
 //====================================
 
-let user = null
-let search = window.location.search.split("&")
+let user = null;
+let search = window.location.search.split("&");
+let roomId = null;
+let password = null;
+let gameDetails = null;
+let gameHasTimer = false;
+//class timer
+let timer = null;
+let myTurn = false;
+let kingIsAttacked = false;
+let pawnToPromotePosition = null;
+let castling = null;
 
-let roomId = null
-let password = null
+let gameOver = false;
+let myScore = 0;
+let enemyScore = 0;
 
-let gameDetails = null
-
-let gameHasTimer = false
-let timer = null
-let myTurn = true
-let kingIsAttacked = false
-let pawnToPromotePosition = null
-let castling = null
-
-let gameOver = false
-let myScore = 0
-let enemyScore = 0
-
-let gameStartedAtTimestamp = null
+let gameStartedAtTimestamp = null;
 
 //Ako imamo password bice 2 elementa u nisu search, jer ce password biti odvojen sa & od imena sobe
 if (search.length > 1) {
-  roomId = search[0].split("=")[1]
-  password = search[1].split("=")[1]
+  roomId = search[0].split("=")[1];
+  password = search[1].split("=")[1];
 } else {
-  roomId = search[0].split("=")[1]
+  roomId = search[0].split("=")[1];
 }
 
 //====================================
@@ -55,52 +53,52 @@ if (search.length > 1) {
 //====================================
 
 const fetchUserCallback = (data) => {
-  user = data
+  user = data;
   if (password) {
-    socket.emit("user-connected", user, roomId, password)
+    socket.emit("user-connected", user, roomId, password);
   } else {
-    socket.emit("user-connected", user, roomId)
+    socket.emit("user-connected", user, roomId);
   }
-  socket.emit("get-game-details", roomId, user)
-}
+  socket.emit("get-game-details", roomId, user);
+};
 
-fetchData("/api/user-info", fetchUserCallback)
+fetchData("/api/user-info", fetchUserCallback);
 
 //Display chess board logic
 const displayChessPieces = () => {
   boxes.forEach((box) => {
-    box.innerHTML = ""
-  })
+    box.innerHTML = "";
+  });
 
   lightPieces.forEach((piece) => {
-    let box = document.getElementById(piece.position)
+    let box = document.getElementById(piece.position);
     box.innerHTML += `
             <div class="piece light" data-piece="${piece.piece}" data-points="${piece.points}">
                 <img src="${piece.icon}" alt="Chess Piece">
             </div>
-            `
-  })
+            `;
+  });
   blackPieces.forEach((piece) => {
-    let box = document.getElementById(piece.position)
+    let box = document.getElementById(piece.position);
     box.innerHTML += `
-            <div class="piece light" data-piece="${piece.piece}" data-points="${piece.points}">
+            <div class="piece black" data-piece="${piece.piece}" data-points="${piece.points}">
                 <img src="${piece.icon}" alt="Chess Piece">
             </div>
-            `
-  })
-  addPieceListeners()
-}
+            `;
+  });
+  addPieceListeners();
+};
 
 const onClickPiece = (e) => {
   if (!myTurn || gameOver) {
-    return
+    return;
   }
-  hidePossibleMoves()
+  hidePossibleMoves();
 
-  let element = e.target.closest(".piece")
+  let element = e.target.closest(".piece");
   //pozicija se skladisti kao id u divu
-  let position = element.parentNode.id
-  let piece = element.dataset.piece //element.dataset: predstavlja specijalni objekat u JavaScript-u koji sadrži sve podatke definisane putem HTML atributa koji počinju sa data-. Na primer, ako HTML element ima atribut data-piece, onda se tom atributu može pristupiti kroz dataset.piece.
+  let position = element.parentNode.id;
+  let piece = element.dataset.piece; //element.dataset: predstavlja specijalni objekat u JavaScript-u koji sadrži sve podatke definisane putem HTML atributa koji počinju sa data-. Na primer, ako HTML element ima atribut data-piece, onda se tom atributu može pristupiti kroz dataset.piece.
 
   //Ako kliknemo na neku figuru, hocemo da vidimo sve moguce poteze, a ako kliknemo opet onda hocemo da sakrijemo poteze i odselektujemo figuru
   if (
@@ -108,28 +106,28 @@ const onClickPiece = (e) => {
     selectedPiece.piece === piece &&
     selectedPiece.position === position
   ) {
-    hidePossibleMoves()
-    selectedPiece = null
-    return
+    hidePossibleMoves();
+    selectedPiece = null;
+    return;
   }
 
-  selectedPiece = { position, piece }
+  selectedPiece = { position, piece };
 
-  let possibleMoves = findPossibleMoves(position, piece)
+  let possibleMoves = findPossibleMoves(position, piece);
 
-  showPossibleMoves(possibleMoves)
-}
+  showPossibleMoves(possibleMoves);
+};
 const addPieceListeners = () => {
   //player ce biti ili beli ili crni
   document.querySelectorAll(`.piece.${player}`).forEach((piece) => {
-    piece.addEventListener("click", onClickPiece)
-  })
+    piece.addEventListener("click", onClickPiece);
+  });
 
   document.querySelectorAll(`.piece.${enemy}`).forEach((piece) => {
     //Da ne bi imali hover na kursoru na protivnickim figurama
-    piece.style.cursor = "default"
-  })
-}
+    piece.style.cursor = "default";
+  });
+};
 
 //-----------------------------------------
 
@@ -137,101 +135,101 @@ const addPieceListeners = () => {
 
 const showPossibleMoves = (possibleMoves) => {
   possibleMoves.forEach((box) => {
-    let possibleMoveBox = document.createElement("div")
-    possibleMoveBox.classList.add("possible-move")
+    let possibleMoveBox = document.createElement("div");
+    possibleMoveBox.classList.add("possible-move");
 
     //possibleMoveBox.addEventListener("click",move)
 
-    box.appendChild(possibleMoveBox) //Dodaje novi html element kao dete postojecem box
-  })
-}
+    box.appendChild(possibleMoveBox); //Dodaje novi html element kao dete postojecem box
+  });
+};
 
 const hidePossibleMoves = () => {
   document.querySelectorAll(".possible-move").forEach((possibleMoveBox) => {
-    let parent = possibleMoveBox.parentNode
+    let parent = possibleMoveBox.parentNode;
     //possibleMoveBox.addEventListener("click",move)
-    parent.removeChild(possibleMoveBox)
-  })
-}
+    parent.removeChild(possibleMoveBox);
+  });
+};
 
 const findPossibleMoves = (position, piece) => {
-  let splittedPos = position.split("-")
-  let yAxisPos = parseInt(splittedPos[1])
+  let splittedPos = position.split("-");
+  let yAxisPos = parseInt(splittedPos[1]);
 
-  let xAxisPos = splittedPos[0]
+  let xAxisPos = splittedPos[0];
   //A-8 -> y=8, x=A
 
-  let yAxisIndex = yAxis.findIndex((y) => y === yAxisPos) //yAxis je iz chessBoarda niz sa svim mogucim vrednostima, i on trazi onaj indeks za koji je y===yAxisPos
+  let yAxisIndex = yAxis.findIndex((y) => y === yAxisPos); //yAxis je iz chessBoarda niz sa svim mogucim vrednostima, i on trazi onaj indeks za koji je y===yAxisPos
 
-  let xAxisIndex = xAxis.findIndex((x) => x === xAxisPos)
+  let xAxisIndex = xAxis.findIndex((x) => x === xAxisPos);
 
   switch (piece) {
     case "pawn":
-      return getPawnPossibleMoves(xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) // Ova fja ce vratiti niz sa svim mogucim potezima
+      return getPawnPossibleMoves(xAxisPos, yAxisPos, xAxisIndex, yAxisIndex); // Ova fja ce vratiti niz sa svim mogucim potezima
     default:
-      return []
+      return [];
   }
-}
+};
 //-----------------------------------------
 
-const updateTimer = () => {}
+const updateTimer = () => {};
 
-const timerEndedCallback = () => {}
+const timerEndedCallback = () => {};
 
 const setCursor = (cursor) => {
   document.querySelectorAll(`.piece.${player}`).forEach((piece) => {
-    piece.getElementsByClassName.cursor = cursor
-  })
-}
+    piece.getElementsByClassName.cursor = cursor;
+  });
+};
 
 const startGame = (user) => {
-  playerBlack.querySelector(".username").innerText = playerTwo.username
+  playerBlack.querySelector(".username").innerText = playerTwo.username;
 
-  waitingMessage.classList.add("hidden")
-  playerBlack.classList.remove("hidden")
-  displayChessPieces()
-}
+  waitingMessage.classList.add("hidden");
+  playerBlack.classList.remove("hidden");
+  displayChessPieces();
+};
 
-displayChessPieces()
+displayChessPieces();
 
 //====================================
 //Socket Listeners
 //===============================
 
 socket.on("receive-game-details", (details) => {
-  gameDetails = details
+  gameDetails = details;
 
-  let playerOne = gameDetails.players[0]
+  let playerOne = gameDetails.players[0];
 
-  gameHasTimer = gameDetails.time > 0
+  gameHasTimer = gameDetails.time > 0;
 
   if (!gameHasTimer) {
-    playerLightTimer.classList.add("hidden")
-    playerBlackTimer.classList.add("hidden")
+    playerLightTimer.classList.add("hidden");
+    playerBlackTimer.classList.add("hidden");
   } else {
-    playerBlackTimer.innerText = gameDetails.time + ":00"
-    playerLightTimer.innerText = gameDetails.time + ":00"
+    playerBlackTimer.innerText = gameDetails.time + ":00";
+    playerLightTimer.innerText = gameDetails.time + ":00";
   }
 
-  playerLight.querySelector(".username").innerText = playerOne.username
+  playerLight.querySelector(".username").innerText = playerOne.username;
 
   if (playerOne.username === user.username) {
-    player = "light"
-    enemy = "black"
+    player = "light";
+    enemy = "black";
 
-    myTurn = true
+    myTurn = true;
   } else {
     gameStartedAtTimestamp = new Date()
       .toISOString()
       .slice(0, 19)
-      .replace("T", " ")
+      .replace("T", " ");
 
-    player = "black"
-    enemy = "light"
+    player = "black";
+    enemy = "light";
 
     //Svaki put kad krene partija kursor se postavlja na default
-    setCursor("default")
-    startGame(user)
+    ("default");
+    startGame(user);
   }
 
   if (gameHasTimer) {
@@ -242,22 +240,23 @@ socket.on("receive-game-details", (details) => {
       0,
       updateTimer,
       timerEndedCallback
-    )
+    );
   }
 
-  hideSpinner()
-  room.classList.remove("hidden")
-})
+  hideSpinner();
+  room.classList.remove("hidden");
+});
 
-//if we are first player and someone joins then this event is emited
+//if we are first player and someone joins then this event is emitted
 socket.on("game-started", (playerTwo) => {
   gameStartedAtTimestamp = new Date()
     .toISOString()
     .slice(0, 19)
-    .replace("T", " ")
-  startGame(playerTwo)
+    .replace("T", " ");
+
+  startGame(playerTwo);
 
   if (gameHasTimer) {
-    timer.start()
+    timer.start();
   }
-})
+});

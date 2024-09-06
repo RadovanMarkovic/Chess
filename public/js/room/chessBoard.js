@@ -2,13 +2,13 @@
 //constant variables (initial values for the game)
 //====================================
 
-const xAxis = ["A", "B", "C", "D", "E", "F", "G", "H"]
-const yAxis = [1, 2, 3, 4, 5, 6, 7, 8]
+const xAxis = ["A", "B", "C", "D", "E", "F", "G", "H"];
+const yAxis = [1, 2, 3, 4, 5, 6, 7, 8];
 
-let player = "light" //zbog testiranja u klipu 32. 25:23 je promenio ovo
-let enemy = null
+let player = "light"; //zbog testiranja u klipu 32. 25:23 je promenio ovo
+let enemy = null;
 
-let selectedPiece = null
+let selectedPiece = null;
 
 const lightPieces = [
   {
@@ -107,7 +107,7 @@ const lightPieces = [
     points: 5,
     piece: "pawn",
   },
-]
+];
 
 const blackPieces = [
   {
@@ -207,94 +207,94 @@ const blackPieces = [
     points: 5,
     piece: "pawn",
   },
-]
+];
 
 const getPawnPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
-  console.log(yAxisIndex)
-  console.log(xAxisIndex)
+  //console.log(yAxisIndex)
+  //console.log(xAxisIndex)
+
   //Proveravamo da li je beli ili crni jer se drugacije krecu
-  let possibleMoves = []
+  let possibleMoves = [];
 
-  let forwardMoves = 1
+  let forwardMoves = 1;
 
-  let yAxisIndexForCapture = null
-  let canMoveForward = false
+  let yAxisIndexForCapture = null;
+  let canMoveForward = false;
 
   if (player === "light") {
     if (yAxisPos === 7) {
-      console.log("usao u dvojku")
-      forwardMoves = 2
+      forwardMoves = 2;
     }
 
-    yAxisIndexForCapture = yAxisIndex - 1
-    canMoveForward = yAxisIndex > 0 // Mozemo napred ako je ovo vece od 0
+    yAxisIndexForCapture = yAxisIndex - 1;
+    canMoveForward = yAxisIndex > 0; // Mozemo napred ako je ovo vece od 0
 
     for (let y = yAxisIndex - 1; y >= yAxisIndex - forwardMoves; y--) {
       if (y < 0) {
-        console.log("brejkn ga nolo")
-        break
+        break;
       }
 
-      let box = document.getElementById(`${xAxisPos}-${yAxis[y]}`)
+      let box = document.getElementById(`${xAxisPos}-${yAxis[y]}`);
 
       if (box.childElementCount === 0) {
         // Ako na tom polju ne postoji nijedna druga figura, ubaci to u moguce poteze jer pesak ide napred
-        possibleMoves.push(box)
+        possibleMoves.push(box);
       } else {
-        break
+        break;
       }
     }
   } else {
     if (yAxisPos === 2) {
-      forwardMoves = 2
+      forwardMoves = 2;
     }
 
-    yAxisIndexForCapture = yAxisIndex + 1
-    canMoveForward = yAxisIndex > 0 // Mozemo napred ako je ovo vece od 0
+    yAxisIndexForCapture = yAxisIndex + 1;
+    canMoveForward = yAxisIndex > 0; // Mozemo napred ako je ovo vece od 0
 
     for (let y = yAxisIndex + 1; y >= yAxisIndex + forwardMoves; y++) {
       if (y > yAxis.length) {
-        break
+        break;
       }
 
-      let box = document.getElementById(`${xAxisPos}-${yAxis[y]}`)
+      let box = document.getElementById(`${xAxisPos}-${yAxis[y]}`);
 
       if (box.childElementCount === 0) {
         // Ako na tom polju ne postoji nijedna druga figura, ubaci to u moguce poteze jer pesak ide napred
-        possibleMoves.push(box)
+        possibleMoves.push(box);
       } else {
-        break
+        break;
       }
     }
   }
 
+  //ukoliko mozemo da pojedemo levo ili desno, a da je protivnikov pijun
   if (canMoveForward) {
     if (xAxisIndex > 0) {
       let pieceToCaptureLeft = document.getElementById(
         `${xAxis[xAxisIndex - 1]}-${yAxis[yAxisIndexForCapture]}`
-      )
+      );
 
       if (
         pieceToCaptureLeft.childrenElementCount > 0 &&
         pieceToCaptureLeft.children[0].classList.contains(enemy)
       ) {
-        possibleMoves.push(pieceToCaptureLeft)
+        possibleMoves.push(pieceToCaptureLeft);
       }
     }
 
     if (xAxisIndex < xAxis.length - 1) {
       let pieceToCaptureRight = document.getElementById(
         `${xAxis[xAxisIndex + 1]}-${yAxis[yAxisIndexForCapture]}`
-      )
+      );
 
       if (
         pieceToCaptureRight.childrenElementCount > 0 &&
         pieceToCaptureRight.children[0].classList.contains(enemy)
       ) {
-        possibleMoves.push(pieceToCaptureRight)
+        possibleMoves.push(pieceToCaptureRight);
       }
     }
   }
   //TODO: CHECK FOR EL PASSANT (NE RADIMO GA)
-  return possibleMoves
-}
+  return possibleMoves;
+};
