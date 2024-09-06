@@ -83,7 +83,7 @@ const displayChessPieces = () => {
   blackPieces.forEach((piece) => {
     let box = document.getElementById(piece.position)
     box.innerHTML += `
-            <div class="piece light" data-piece="${piece.piece}" data-points="${piece.points}">
+            <div class="piece black" data-piece="${piece.piece}" data-points="${piece.points}">
                 <img src="${piece.icon}" alt="Chess Piece">
             </div>
             `

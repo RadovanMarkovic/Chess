@@ -123,7 +123,7 @@ io.on("connection", (socket) => {
           socket.join(roomId)
           await newUser(socket.id, user, roomId)
 
-          if (room.players[0].username === user.name) {
+          if (room.players[0].username === user.username) {
             return
           }
 
