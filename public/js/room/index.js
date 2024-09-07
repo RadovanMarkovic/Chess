@@ -293,16 +293,57 @@ const canMakeMove = (
   { piece, pieceToRemove, pieceToRemovePieceImg }
 ) => {
   //TODO: Checkif move is valid
-  let moveIsNotValid = false;
+  let moveIsNotValid = checkIfKingIsAttacked(player);
 
   if (moveIsNotValid) {
     selectedPiece = null;
     if (pieceToRemove) {
-      //TODO: undo everything
+      pieceToRemove.appendChild(pieceToRemovePieceImg);
+      boxToMove.removeChild(piece);
+      boxToMove.appendChild(pieceToRemove);
+
+      if (pieceToRemove.classList.contains("black")) {
+        blackCapturedPieces.removeChild(blackCapturedPieces.lastChild);
+      } else {
+        lightCapturedPieces.removeChild(lightCapturedPieces.lastChild);
+      }
     }
+    currentBox.appendChild(piece);
+    //displayToast("You can't make this move. Your king is under attack")
+
+    return false;
   }
 
   return true;
+};
+
+const capturePiece = (pieceToRemove) => {
+  let pawnImg = pieceToRemove.children[0];
+
+  let li = document.createElement("li");
+  li.appendChild(pawnImg);
+
+  if (pieceToRemove.classList.contains("black")) {
+    blackCapturedPieces.appendChild(li);
+
+    if (!gameOver) {
+      if (player === "light") {
+        myScore += parseInt(pieceToRemove.dataset.points);
+      } else {
+        enemyScore += parseInt(pieceToRemove.dataset.points);
+      }
+    }
+  } else {
+    lightCapturedPieces.appendChild(li);
+
+    if (!gameOver) {
+      if (player === "black") {
+        myScore += parseInt(pieceToRemove.dataset.points);
+      } else {
+        enemyScore += parseInt(pieceToRemove.dataset.points);
+      }
+    }
+  }
 };
 
 const checkIfKingIsAttacked = (playerToCheck) => {
@@ -314,7 +355,18 @@ const checkIfKingIsAttacked = (playerToCheck) => {
   if (check) {
     //proveramo da li smo mi taj igrac pod sahom
     if (player !== playerToCheck) {
-      //TODO: Check is this checkmate or just check
+      if (isCheckmate(kingPossiton)) {
+        socket.emit(
+          "checkmate",
+          roomId,
+          user.username,
+          myScore,
+          gameStartedAtTimestamp
+        );
+        // endGame(user.username)
+      } else {
+        socket.emit("check", roomId);
+      }
     }
 
     return true;

@@ -1015,7 +1015,123 @@ const isCheck = (position, myKing = true) => {
   return false;
 };
 
-const isCheckmate = (position = {});
+const isCheckmate = (enemyKingPossition) => {
+  switchPlayerAndEnemy();
+
+  let splittedPos = kingPosition.split("-");
+
+  let xAxisPos = splittedPos[0];
+  let yAxisPos = splittedPos[1];
+
+  let xAxisIndex = xAxis.findIndex((x) => x === xAxisPos);
+  let yAxisIndex = yAxis.findIndex((y) => y === yAxisPos);
+
+  let getKingPossibleMoves = getKingPossibleMoves(
+    xAxisPos,
+    yAxisPos,
+    xAxisIndex,
+    yAxisIndex
+  );
+
+  let myPieces = document.getElementById(`.piece.${player}`);
+
+  for (let i = 0; i < myPieces.length; i++) {
+    let myPiece = myPieces[i];
+
+    if (myPiece.dataset.piece === "king") continue;
+
+    let myPieceXPos = myPiece.parentNode.id.split("-")[0];
+
+    let myPieceYPos = +myPiece.parentNode.id.split("-")[1];
+
+    let myPieceXAxisIndex = xAxis.findIndex((x) => x === myPieceXPos);
+    let myPieceYAxisIndex = yAxis.findIndex((y) => y === myPieceYPos);
+
+    let piecePossibleMoves;
+
+    switch (myPiece.dataset.piece) {
+      case "pawn":
+        piecePossibleMoves = getPawnPossibleMoves(
+          myPieceXPos,
+          myPieceYPos,
+          myPieceXAxisIndex,
+          myPieceYAxisIndex
+        );
+        break; // Ova fja ce vratiti niz sa svim mogucim potezima
+      case "rook":
+        piecePossibleMoves = getRookPossibleMoves(
+          myPieceXPos,
+          myPieceYPos,
+          myPieceXAxisIndex,
+          myPieceYAxisIndex
+        );
+        break;
+      case "bishop":
+        piecePossibleMoves = getBishopPossibleMoves(
+          myPieceXAxisIndex,
+          myPieceYAxisIndex
+        );
+        break;
+      case "knight":
+        piecePossibleMoves = getKnightPossibleMoves(
+          myPieceXAxisIndex,
+          myPieceYAxisIndex
+        );
+        break;
+      //za kraljicu je zapravo unija lovca i topa
+      case "queen":
+        piecePossibleMoves = Array.prototype.concat(
+          getRookPossibleMoves(
+            myPieceXPos,
+            myPieceYPos,
+            myPieceXAxisIndex,
+            myPieceYAxisIndex
+          ),
+          getBishopPossibleMoves(myPieceXAxisIndex, myPieceYAxisIndex)
+        );
+        break;
+
+      default:
+        break;
+    }
+    let currentBox = myPiece.parentNode;
+    currentBox.innerHTML = "";
+
+    for (let j = 0; j < piecePossibleMoves.length; j++) {
+      let possibleMove = piecePossibleMoves[i];
+      let boxToMove = document.getElementById(possibleMove.id);
+      let removedPiece = null;
+      if (boxToMove.children.length > 0) {
+        removedPiece = boxToMove.children[0];
+      }
+      boxToMove.innerHTML = "";
+
+      boxToMove.appendChild(myPiece);
+
+      let check = isCheck(enemyKingPossition);
+
+      boxToMove.innerHTML = "";
+
+      if (removedPiece) {
+        boxToMove.appendChild(removedPiece);
+      }
+      if (!check) {
+        currentBox.appendChild(myPiece);
+        switchPlayerAndEnemy();
+        return false;
+      }
+    }
+    currentBox.appendChild(myPiece);
+  }
+  switchPlayerAndEnemy();
+
+  if (getKingPossibleMoves.length === 0) {
+    //get
+    return true;
+  }
+
+  return false;
+};
 
 const getKingPosition = (pieceColor) => {
   let pieces = document.querySelectorAll(`.piece.${pieceColor}`);

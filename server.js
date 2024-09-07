@@ -262,6 +262,81 @@ io.on("connection", (socket) => {
     }
   });
 
+  /* socket.on("move-made",
+    (
+      roomId,
+      move,
+      pawnPromotion = null,
+      castling = null,
+      elPassantPerformed = false
+    ) => {
+      //ovde su svi potezi, izbrisacemo one koje necemo da implementiramo
+      redisClient.get(roomId, (err, reply) => {
+        if (err) throw err;
+        if (reply) {
+          let room = JSON.parse(reply);
+
+          room.moves.push(move);
+
+          redisClient.set(roomId, JSON.stringify(room));
+
+          if (pawnPromotion) {
+            socket
+              .io(roomId)
+              .emit("enemy-moved_pawn-promotion", move, pawnPromotion);
+          } else if (castling) {
+            socket.to(roomId).emit("enemy-moved_castling", castling);
+          } else if (elPassantPerformed) {
+            socket.io(roomId).emit("enemy-moved_el-passant", move);
+          } else {
+            socket.io(roomId).emit("enemy-moved", move);
+          }
+        } else {
+          socket.emit("error", "Something went wrong with the connection");
+        }
+      });
+    }
+  );*/
+
+  socket.on(
+    "move-made",
+    async (
+      roomId,
+      move,
+      pawnPromotion = null,
+      castling = null,
+      elPassantPerformed = false
+    ) => {
+      try {
+        const reply = await redisClient.get(roomId);
+
+        if (reply) {
+          let room = JSON.parse(reply);
+          room.moves.push(move);
+
+          await redisClient.set(roomId, JSON.stringify(room));
+
+          if (pawnPromotion) {
+            socket
+              .io(roomId)
+              .emit("enemy-moved_pawn-promotion", move, pawnPromotion);
+          } else if (castling) {
+            socket.to(roomId).emit("enemy-moved_castling", castling);
+          } else if (elPassantPerformed) {
+            socket.io(roomId).emit("enemy-moved_el-passant", move);
+          } else {
+            socket.io(roomId).emit("enemy-moved", move);
+          }
+        } else {
+          socket.emit("error", "Something went wrong with the connection");
+        }
+      } catch (err) {
+        console.error("Error processing move:", err);
+        socket.emit("error", "An error occurred while processing the move.");
+      }
+    }
+  );
+
   socket.on("join-random", async (user) => {
     try {
       const reply = await redisClient.get("rooms");
