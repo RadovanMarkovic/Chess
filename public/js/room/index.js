@@ -170,6 +170,16 @@ const findPossibleMoves = (position, piece) => {
       return getRookPossibleMoves(xAxisPos, yAxisPos, xAxisIndex, yAxisIndex);
     case "bishop":
       return getBishopPossibleMoves(xAxisIndex, yAxisIndex);
+    case "knight":
+      return getKnightPossibleMoves(xAxisIndex, yAxisIndex);
+    //za kraljicu je zapravo unija lovca i topa
+    case "queen":
+      return Array.prototype.concat(
+        getRookPossibleMoves(xAxisPos, yAxisPos, xAxisIndex, yAxisIndex),
+        getBishopPossibleMoves(xAxisIndex, yAxisIndex)
+      );
+    case "king":
+      return getKingPossibleMoves(xAxisPos, yAxisPos, xAxisIndex, yAxisIndex);
     default:
       return [];
   }
@@ -198,6 +208,27 @@ const startGame = (user) => {
   playerBlack.classList.remove("hidden");
   displayChessPieces();
 };
+
+//PROVERITI STA CEMO OD OVIH FUNCKIJA DA RADIMOO!!!! ROKADA, PROMOCIJA I EL PASANT
+const endMyTurn = (
+  newPieceBox,
+  pawnPromoted = false,
+  castlingPerformed = false,
+  elPassantPerformed = false
+) => {
+  if (kingIsAttacked) {
+    //setKingisAttacked(false);
+  }
+
+  myTurn = false;
+  setCursor("default");
+
+  //moracemo ovde da saljemo preko socketa drugom koristiku sta se odigralo
+  // saveMove(newPieceBox,pawnPromoted,castlingPerformed,elPassantPerformed);
+
+  // checkIfKingIsAttacked(enemy);
+};
+
 //--------------------------------------
 //Move logic
 const move = (e) => {
@@ -225,6 +256,10 @@ const move = (e) => {
 
   if (pieceToRemove) {
     //TODO: Capture piece
+
+    // capturePiece(pieceToRemove);
+
+    boxToMove.innerHTML = "";
   }
 
   boxToMove.appendChild(piece);
@@ -250,7 +285,7 @@ const move = (e) => {
 
   //TODO: Check for draw
 
-  //TODO: End my turn
+  endMyTurn(boxToMove);
 };
 
 const canMakeMove = (
@@ -269,7 +304,74 @@ const canMakeMove = (
 
   return true;
 };
+
+const checkIfKingIsAttacked = (playerToCheck) => {
+  //funkciju getKingPosition napravili smo u chessBoard
+  let kingPossiton = getKingPosition(playerToCheck);
+
+  let check = isCheck(kingPossiton, playerToCheck === player);
+
+  if (check) {
+    //proveramo da li smo mi taj igrac pod sahom
+    if (player !== playerToCheck) {
+      //TODO: Check is this checkmate or just check
+    }
+
+    return true;
+  }
+  return false;
+};
+
+const saveMove = (
+  newPieceBox,
+  pawnPromoted,
+  castlingPerformed,
+  elPassantPerformed
+) => {
+  let move = {
+    from: selectedPiece.position,
+    to: newPieceBox.id,
+    piece: selectedPiece.piece,
+    pieceColor: player,
+  };
+
+  selectedPiece = null;
+
+  pawnToPromotePosition = null;
+
+  if (gameHasTimer) {
+    let currentTime;
+
+    if (player === "light") {
+      currentTime = playerLightTimer.innerText;
+    } else {
+      currentTime = playerBlackTimer.innerText;
+    }
+
+    move.time = currentTime;
+    timer.stop();
+  }
+
+  if (pawnPromoted) {
+    // TODO: pass the pawn promotion also
+  } else if (castlingPerformed) {
+    //TODO:  pass the castling also
+  } else if (elPassantPerformed) {
+    //TODO: pass elPassant also
+  } else {
+    //emitujemo da je potez odigran
+    socket.emit("move-made", roomId, move);
+  }
+};
+
+const moveEnemy = (
+  move,
+  pawnPromotion = null,
+  elPassantPerformed = false
+) => {};
+
 //-----------------------------------------------------
+
 displayChessPieces();
 
 //====================================

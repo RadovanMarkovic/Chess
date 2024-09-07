@@ -26,30 +26,30 @@ const lightPieces = [
   //   points: 3,
   //   piece: "knight",
   // },
-  {
-    position: "C-8",
-    icon: "../assets/chess-icons/light/chess-bishop-light.svg",
-    points: 3,
-    piece: "bishop",
-  },
   // {
-  //   position: "D-8",
-  //   icon: "../assets/chess-icons/light/chess-queen-light.svg",
-  //   points: 9,
-  //   piece: "queen",
+  //   position: "C-8",
+  //   icon: "../assets/chess-icons/light/chess-bishop-light.svg",
+  //   points: 3,
+  //   piece: "bishop",
   // },
+  {
+    position: "D-8",
+    icon: "../assets/chess-icons/light/chess-queen-light.svg",
+    points: 9,
+    piece: "queen",
+  },
   {
     position: "E-8",
     icon: "../assets/chess-icons/light/chess-king-light.svg",
     points: 10,
     piece: "king",
   },
-  {
-    position: "F-8",
-    icon: "../assets/chess-icons/light/chess-bishop-light.svg",
-    points: 3,
-    piece: "bishop",
-  },
+  // {
+  //   position: "F-8",
+  //   icon: "../assets/chess-icons/light/chess-bishop-light.svg",
+  //   points: 3,
+  //   piece: "bishop",
+  // },
   // {
   //   position: "G-8",
   //   icon: "../assets/chess-icons/light/chess-knight-light.svg",
@@ -211,6 +211,8 @@ const blackPieces = [
     piece: "pawn",
   },
 ];
+
+//Funkcije za kretanje figurica po tabli
 
 const getPawnPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
   //console.log(yAxisIndex)
@@ -572,4 +574,456 @@ const getBishopPossibleMoves = (xAxisIndex, yAxisIndex) => {
     yInc++;
   }
   return possibleMoves;
+};
+
+//LOVAC MOZE DA POJEDE KRALJA!!!
+const getKnightPossibleMoves = (xAxisIndex, yAxisIndex) => {
+  let possibleMoves = [];
+
+  //LEFT-UP
+  if (xAxisIndex - 2 > -1 && yAxisIndex + 1 < yAxis.length) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex - 2]}-${yAxis[yAxisIndex + 1]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //LEFT-DOWN
+  if (xAxisIndex - 2 > -1 && yAxisIndex - 1 > -1) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex - 2]}-${yAxis[yAxisIndex - 1]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //RIGHT-UP
+  if (xAxisIndex + 2 < xAxis.length && yAxisIndex + 1 < yAxis.length) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex + 2]}-${yAxis[yAxisIndex + 1]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //RIGHT-DOWN
+  if (xAxisIndex + 2 < xAxis.length && yAxisIndex - 1 > -1) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex + 2]}-${yAxis[yAxisIndex - 1]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //UP-LEFT
+  if (xAxisIndex - 1 > -1 && yAxisIndex + 2 < yAxis.length) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex - 1]}-${yAxis[yAxisIndex + 2]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //UP-RIGHT
+  if (xAxisIndex + 1 < xAxis.length && yAxisIndex + 2 < yAxis.length) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex + 1]}-${yAxis[yAxisIndex + 2]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //DOWN-LEFT
+  if (xAxisIndex - 1 > -1 && yAxisIndex - 2 > -1) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex - 1]}-${yAxis[yAxisIndex - 2]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //DOWN-RIGHT
+  if (xAxisIndex + 1 < xAxis.length && yAxisIndex - 2 > -1) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex + 1]}-${yAxis[yAxisIndex - 2]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  return possibleMoves;
+};
+
+const getKingPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
+  let possibleMoves = [];
+
+  //TOP
+  if (yAxisIndex + 1 < yAxis.length) {
+    let block = document.getElementById(`${xAxisPos}-${yAxis[yAxisIndex + 1]}`);
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //BOTTOM
+  if (yAxisIndex - 1 > -1) {
+    let block = document.getElementById(`${xAxisPos}-${yAxis[yAxisIndex - 1]}`);
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //LEFT
+  if (xAxisIndex - 1 > -1) {
+    let block = document.getElementById(`${xAxis[xAxisIndex - 1]}-${yAxisPos}`);
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //RIGHT
+  if (xAxisIndex + 1 < xAxis.length) {
+    let block = document.getElementById(`${xAxis[xAxisIndex + 1]}-${yAxisPos}`);
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //TOP-LEFT
+  if (xAxisIndex - 1 > -1 && yAxisIndex + 1 < yAxis.length) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex - 1]}-${yAxis[yAxisIndex + 1]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //TOP-RIGHT
+  if (xAxisIndex + 1 < xAxis.length && yAxisIndex + 1 < yAxis.length) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex + 1]}-${yAxis[yAxisIndex + 1]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //BOTTOM-LEFT
+  if (xAxisIndex - 1 > -1 && yAxisIndex - 1 > -1) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex - 1]}-${yAxis[yAxisIndex - 1]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //BOTTOM-RIGHT
+  if (xAxisIndex + 1 < xAxis.length && yAxisIndex - 1 > -1) {
+    let block = document.getElementById(
+      `${xAxis[xAxisIndex + 1]}-${yAxis[yAxisIndex - 1]}`
+    );
+
+    if (block.childrenElementCount > 0) {
+      if (block.children[0].classList.contains(enemy)) {
+        possibleMoves.push(block);
+      }
+    } else {
+      possibleMoves.push(block);
+    }
+  }
+
+  //ukljucujemo funkciju koja proverava da li je sah i vraca moguce opcije za kinga
+  possibleMoves = possibleMoves.filter((possibleMove) => {
+    let kingPosition = possibleMove.id;
+
+    if (!isCheck(kingPosition)) {
+      return possibleMove;
+    }
+  });
+
+  return possibleMoves;
+};
+
+const getQueenPossibleMoves = (
+  xAxisPos,
+  yAxisPos,
+  xAxisIndex,
+  yAxisIndex
+) => {};
+
+const switchPlayerAndEnemy = () => {
+  if (player === "light") {
+    player = "black";
+    enemy = "light";
+  } else {
+    player = "light";
+    enemy = "black";
+  }
+};
+
+//funkcija koja proverava da li je sah - TESKA I VELIKA
+const isCheck = (position, myKing = true) => {
+  let splittedPos = kingPosition.split("-");
+
+  let xAxisPos = splittedPos[0];
+  let yAxisPos = splittedPos[1];
+
+  let xAxisIndex = xAxis.findIndex((x) => x === xAxisPos);
+  let yAxisIndex = yAxis.findIndex((y) => y === yAxisPos);
+
+  if (!myKing) {
+    switchPlayerAndEnemy();
+  }
+
+  //ne ukljucujemo pawn jer je njegov napad ukljucen u lovca
+  let possibleMoves = Array.prototype.concat(
+    (getRookPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex)),
+    (getBishopPossibleMoves = (xAxisIndex, yAxisIndex)),
+    (getKnightPossibleMoves = (xAxisIndex, yAxisIndex))
+  );
+
+  //proveravamo da li je kralj na nekom od ovih mogucih napada
+  for (let i = 0; i < possibleMoves.length; i++) {
+    let box = possibleMoves[i];
+
+    if (box.children.length > 0) {
+      let piece = box.children[0];
+
+      let pieceXPos = box.id.split("-")[0];
+      //ovde smo dodali plus da konvertujemo u int jer je + u JS unarni operator (string->int)
+      let pieceYPos = +box.id.split("-")[1];
+
+      let pieceXAxisIndex = xAxis.findIndex((x) => x === pieceXPos);
+      let pieceYAxisIndex = yAxis.findIndex((y) => y === pieceYPos);
+
+      switch (piece.dataset.piece) {
+        case "pawn":
+          if (enemy === "light") {
+            if (
+              //proveramo da li pesak napada naseg kralja
+              (pieceXAxisIndex === xAxisIndex - 1 &&
+                pieceYAxisIndex === yAxisIndex + 1) ||
+              (pieceXAxisIndex === xAxisIndex + 1 &&
+                pieceYAxisIndex === yAxisIndex + 1)
+            ) {
+              if (!myKing) {
+                switchPlayerAndEnemy();
+              }
+              return true;
+            }
+          } else {
+            if (
+              //proveramo da li pesak napada naseg kralja
+              (pieceXAxisIndex === xAxisIndex - 1 &&
+                pieceYAxisIndex === yAxisIndex - 1) ||
+              (pieceXAxisIndex === xAxisIndex + 1 &&
+                pieceYAxisIndex === yAxisIndex - 1)
+            ) {
+              if (!myKing) {
+                switchPlayerAndEnemy();
+              }
+              return true;
+            }
+          }
+          break;
+        case "knight":
+          if (
+            (pieceXAxisIndex === xAxisIndex - 1 &&
+              pieceYAxisIndex === yAxisIndex + 2) ||
+            (pieceXAxisIndex === xAxisIndex - 1 &&
+              pieceYAxisIndex === yAxisIndex - 2) ||
+            (pieceXAxisIndex === xAxisIndex + 1 &&
+              pieceYAxisIndex === yAxisIndex + 2) ||
+            (pieceXAxisIndex === xAxisIndex + 1 &&
+              pieceYAxisIndex === yAxisIndex - 2) ||
+            (pieceXAxisIndex === xAxisIndex - 2 &&
+              pieceYAxisIndex === yAxisIndex + 1) ||
+            (pieceXAxisIndex === xAxisIndex - 2 &&
+              pieceYAxisIndex === yAxisIndex - 1) ||
+            (pieceXAxisIndex === xAxisIndex + 2 &&
+              pieceYAxisIndex === yAxisIndex + 1) ||
+            (pieceXAxisIndex === xAxisIndex + 2 &&
+              pieceYAxisIndex === yAxisIndex - 1)
+          ) {
+            if (!myKing) {
+              switchPlayerAndEnemy();
+            }
+
+            return true;
+          }
+          break;
+        case "rook":
+          if (pieceXPos === xAxisPos || pieceYPos === yAxisPos) {
+            if (!myKing) {
+              switchPlayerAndEnemy();
+            }
+
+            return true;
+          }
+          break;
+        case "bishop":
+          //da li se lovac krece dijagonalno proveramo
+          let xyBlockDiffIsTheSame =
+            Math.abs(xAxisIndex - pieceXAxisIndex) ===
+            Math.abs(yAxisIndex - pieceYAxisIndex);
+          if (
+            (pieceXAxisIndex < xAxisIndex &&
+              pieceYAxisIndex > yAxisIndex &&
+              xyBlockDiffIsTheSame) ||
+            (pieceXAxisIndex < xAxisIndex &&
+              pieceYAxisIndex < yAxisIndex &&
+              xyBlockDiffIsTheSame) ||
+            (pieceXAxisIndex > xAxisIndex &&
+              pieceYAxisIndex > yAxisIndex &&
+              xyBlockDiffIsTheSame) ||
+            (pieceXAxisIndex > xAxisIndex &&
+              pieceYAxisIndex < yAxisIndex &&
+              xyBlockDiffIsTheSame)
+          ) {
+            if (!myKing) {
+              switchPlayerAndEnemy();
+            }
+
+            return true;
+          }
+          break;
+        case "queen":
+          // let xyBlockDiffIsTheSame =
+          //   Math.abs(xAxisIndex - pieceXAxisIndex) ===
+          //   Math.abs(yAxisIndex - pieceYAxisIndex);
+          if (
+            pieceXPos === xAxisPos ||
+            pieceYPos === yAxisPos ||
+            (pieceXAxisIndex < xAxisIndex &&
+              pieceYAxisIndex > yAxisIndex &&
+              xyBlockDiffIsTheSame) ||
+            (pieceXAxisIndex < xAxisIndex &&
+              pieceYAxisIndex < yAxisIndex &&
+              xyBlockDiffIsTheSame) ||
+            (pieceXAxisIndex > xAxisIndex &&
+              pieceYAxisIndex > yAxisIndex &&
+              xyBlockDiffIsTheSame) ||
+            (
+              pieceXAxisIndex > xAxisIndex &&
+              pieceYAxisIndex < yAxisIndex &&
+              xyBlockDiffIsTheSame
+            )()
+          ) {
+            if (!myKing) {
+              switchPlayerAndEnemy();
+            }
+
+            return true;
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
+  if (!myKing) {
+    switchPlayerAndEnemy();
+  }
+
+  return false;
+};
+
+const isCheckmate = (position = {});
+
+const getKingPosition = (pieceColor) => {
+  let pieces = document.querySelectorAll(`.piece.${pieceColor}`);
+
+  for (let i = 0; i < pieces.length; i++) {
+    if (pieces[i].dataset.piece === "king") {
+      //vracamo id polja na tabli na kome se nalazi king
+      return pieces[i].parentNode.id;
+    }
+  }
 };
