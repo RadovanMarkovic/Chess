@@ -201,7 +201,7 @@ const setCursor = (cursor) => {
   });
 };
 
-const startGame = (user) => {
+const startGame = (playerTwo) => {
   playerBlack.querySelector(".username").innerText = playerTwo.username;
 
   waitingMessage.classList.add("hidden");
@@ -217,21 +217,24 @@ const endMyTurn = (
   elPassantPerformed = false
 ) => {
   if (kingIsAttacked) {
-    //setKingisAttacked(false);
+    //OVO NEMA NIGDE FUNKIJA
+    setKingisAttacked(false);
   }
 
   myTurn = false;
   setCursor("default");
 
-  //moracemo ovde da saljemo preko socketa drugom koristiku sta se odigralo
-  // saveMove(newPieceBox,pawnPromoted,castlingPerformed,elPassantPerformed);
+  console.log("usao u endMyTurn");
+  //moracemo ovde da saljemo preko socketa drugom koristiku sta se odigralo ??????
+  saveMove(newPieceBox, pawnPromoted, castlingPerformed, elPassantPerformed);
 
-  // checkIfKingIsAttacked(enemy);
+  checkIfKingIsAttacked(enemy);
 };
 
 //--------------------------------------
 //Move logic
 const move = (e) => {
+  console.log("usao u move");
   let currentBox = document.getElementById(selectedPiece.position);
   let boxToMove = e.target.parentNode;
   let piece = currentBox.querySelector(".piece");
@@ -257,7 +260,7 @@ const move = (e) => {
   if (pieceToRemove) {
     //TODO: Capture piece
 
-    // capturePiece(pieceToRemove);
+    capturePiece(pieceToRemove);
 
     boxToMove.innerHTML = "";
   }
@@ -285,6 +288,7 @@ const move = (e) => {
 
   //TODO: Check for draw
 
+  console.log("ulaziiii");
   endMyTurn(boxToMove);
 };
 
@@ -292,7 +296,7 @@ const canMakeMove = (
   { currentBox, boxToMove },
   { piece, pieceToRemove, pieceToRemovePieceImg }
 ) => {
-  //TODO: Checkif move is valid
+  //TODO: Check if move is valid
   let moveIsNotValid = checkIfKingIsAttacked(player);
 
   if (moveIsNotValid) {
@@ -387,6 +391,7 @@ const saveMove = (
     pieceColor: player,
   };
 
+  console.log("usao u saveMove");
   selectedPiece = null;
 
   pawnToPromotePosition = null;
@@ -416,11 +421,46 @@ const saveMove = (
   }
 };
 
-const moveEnemy = (
-  move,
-  pawnPromotion = null,
-  elPassantPerformed = false
-) => {};
+const moveEnemy = (move, pawnPromotion = null, elPassantPerformed = false) => {
+  //TODO: initialize pawnsToPerformElPassant Object
+
+  const { from, to, piece } = move;
+
+  let boxMovedFrom = document.getElementById(from);
+  let boxMovedTo = document.getElementById(to);
+
+  //protivnik je uzeo neku nasu figuricu
+  if (boxMovedTo.children.length > 0) {
+    let pieceToRemove = boxMovedTo.children[0];
+
+    capturePiece(pieceToRemove);
+  }
+
+  boxMovedTo.innerHTML = "";
+
+  let enemyPiece = boxMovedFrom.children[0];
+
+  if (pawnPromotion) {
+    //TODO: promote piece
+  }
+
+  boxMovedFrom.innerHTML = "";
+
+  boxMovedTo.appendChild(enemyPiece);
+
+  if (elPassantPerformed) {
+    //TODO: perform el passant
+  }
+
+  //TODO: check if piece and if true add the piece to pawnsToPerformElPassant Object
+
+  myTurn = true;
+  setCursor("pointer");
+
+  if (gameHasTimer) {
+    timer.start();
+  }
+};
 
 //-----------------------------------------------------
 
@@ -493,4 +533,8 @@ socket.on("game-started", (playerTwo) => {
   if (gameHasTimer) {
     timer.start();
   }
+});
+
+socket.on("enemy-moved", (move) => {
+  moveEnemy(move);
 });

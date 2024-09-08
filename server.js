@@ -133,7 +133,7 @@ io.on("connection", (socket) => {
 
           room.gameStarted = true;
           await redisClient.set(roomId, JSON.stringify(room));
-          socket.to(roomId).emit("game-started");
+          socket.to(roomId).emit("game-started", user);
 
           let roomIndicesReply = await redisClient.get("roomIndices");
           if (roomIndicesReply) {
@@ -318,14 +318,15 @@ io.on("connection", (socket) => {
 
           if (pawnPromotion) {
             socket
-              .io(roomId)
+              .to(roomId)
               .emit("enemy-moved_pawn-promotion", move, pawnPromotion);
           } else if (castling) {
             socket.to(roomId).emit("enemy-moved_castling", castling);
           } else if (elPassantPerformed) {
-            socket.io(roomId).emit("enemy-moved_el-passant", move);
+            socket.to(roomId).emit("enemy-moved_el-passant", move);
           } else {
-            socket.io(roomId).emit("enemy-moved", move);
+            //console.log("radi dovde");
+            socket.to(roomId).emit("enemy-moved", move);
           }
         } else {
           socket.emit("error", "Something went wrong with the connection");

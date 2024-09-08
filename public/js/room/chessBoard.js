@@ -5,8 +5,8 @@
 const xAxis = ["A", "B", "C", "D", "E", "F", "G", "H"];
 const yAxis = [1, 2, 3, 4, 5, 6, 7, 8];
 
-let player = "light"; //zbog testiranja u klipu 32. 25:23 je promenio ovo
-let enemy = "black"; //za sada je promenio u crno 35. 10:50
+let player = null; //zbog testiranja u klipu 32. 25:23 je promenio ovo
+let enemy = null; //za sada je promenio u crno 35. 10:50
 
 let isLeftCastlingPerformed = false;
 let isRightCastlingPerformed = false;
@@ -14,24 +14,24 @@ let isRightCastlingPerformed = false;
 let selectedPiece = null;
 
 const lightPieces = [
-  // {
-  //   position: "A-8",
-  //   icon: "../assets/chess-icons/light/chess-rook-light.svg",
-  //   points: 5,
-  //   piece: "rook",
-  // },
-  // {
-  //   position: "B-8",
-  //   icon: "../assets/chess-icons/light/chess-knight-light.svg",
-  //   points: 3,
-  //   piece: "knight",
-  // },
-  // {
-  //   position: "C-8",
-  //   icon: "../assets/chess-icons/light/chess-bishop-light.svg",
-  //   points: 3,
-  //   piece: "bishop",
-  // },
+  {
+    position: "A-8",
+    icon: "../assets/chess-icons/light/chess-rook-light.svg",
+    points: 5,
+    piece: "rook",
+  },
+  {
+    position: "B-8",
+    icon: "../assets/chess-icons/light/chess-knight-light.svg",
+    points: 3,
+    piece: "knight",
+  },
+  {
+    position: "C-8",
+    icon: "../assets/chess-icons/light/chess-bishop-light.svg",
+    points: 3,
+    piece: "bishop",
+  },
   {
     position: "D-8",
     icon: "../assets/chess-icons/light/chess-queen-light.svg",
@@ -44,72 +44,72 @@ const lightPieces = [
     points: 10,
     piece: "king",
   },
-  // {
-  //   position: "F-8",
-  //   icon: "../assets/chess-icons/light/chess-bishop-light.svg",
-  //   points: 3,
-  //   piece: "bishop",
-  // },
-  // {
-  //   position: "G-8",
-  //   icon: "../assets/chess-icons/light/chess-knight-light.svg",
-  //   points: 3,
-  //   piece: "knight",
-  // },
-  // {
-  //   position: "H-8",
-  //   icon: "../assets/chess-icons/light/chess-rook-light.svg",
-  //   points: 5,
-  //   piece: "rook",
-  // },
-  // {
-  //   position: "A-7",
-  //   icon: "../assets/chess-icons/light/chess-pawn-light.svg",
-  //   points: 5,
-  //   piece: "pawn",
-  // },
-  // {
-  //   position: "B-7",
-  //   icon: "../assets/chess-icons/light/chess-pawn-light.svg",
-  //   points: 5,
-  //   piece: "pawn",
-  // },
-  // {
-  //   position: "C-7",
-  //   icon: "../assets/chess-icons/light/chess-pawn-light.svg",
-  //   points: 5,
-  //   piece: "pawn",
-  // },
-  // {
-  //   position: "D-7",
-  //   icon: "../assets/chess-icons/light/chess-pawn-light.svg",
-  //   points: 5,
-  //   piece: "pawn",
-  // },
-  // {
-  //   position: "E-7",
-  //   icon: "../assets/chess-icons/light/chess-pawn-light.svg",
-  //   points: 5,
-  //   piece: "pawn",
-  // },
-  // {
-  //   position: "F-7",
-  //   icon: "../assets/chess-icons/light/chess-pawn-light.svg",
-  //   points: 5,
-  //   piece: "pawn",
-  // },
-  // {
-  //   position: "G-7",
-  //   icon: "../assets/chess-icons/light/chess-pawn-light.svg",
-  //   points: 5,
-  //   piece: "pawn",
-  // },
-  // {
-  //   position: "H-7",
-  //   icon: "../assets/chess-icons/light/chess-pawn-light.svg",
-  //   points: 5,
-  //   piece: "pawn",
-  // },
+  {
+    position: "F-8",
+    icon: "../assets/chess-icons/light/chess-bishop-light.svg",
+    points: 3,
+    piece: "bishop",
+  },
+  {
+    position: "G-8",
+    icon: "../assets/chess-icons/light/chess-knight-light.svg",
+    points: 3,
+    piece: "knight",
+  },
+  {
+    position: "H-8",
+    icon: "../assets/chess-icons/light/chess-rook-light.svg",
+    points: 5,
+    piece: "rook",
+  },
+  {
+    position: "A-7",
+    icon: "../assets/chess-icons/light/chess-pawn-light.svg",
+    points: 5,
+    piece: "pawn",
+  },
+  {
+    position: "B-7",
+    icon: "../assets/chess-icons/light/chess-pawn-light.svg",
+    points: 5,
+    piece: "pawn",
+  },
+  {
+    position: "C-7",
+    icon: "../assets/chess-icons/light/chess-pawn-light.svg",
+    points: 5,
+    piece: "pawn",
+  },
+  {
+    position: "D-7",
+    icon: "../assets/chess-icons/light/chess-pawn-light.svg",
+    points: 5,
+    piece: "pawn",
+  },
+  {
+    position: "E-7",
+    icon: "../assets/chess-icons/light/chess-pawn-light.svg",
+    points: 5,
+    piece: "pawn",
+  },
+  {
+    position: "F-7",
+    icon: "../assets/chess-icons/light/chess-pawn-light.svg",
+    points: 5,
+    piece: "pawn",
+  },
+  {
+    position: "G-7",
+    icon: "../assets/chess-icons/light/chess-pawn-light.svg",
+    points: 5,
+    piece: "pawn",
+  },
+  {
+    position: "H-7",
+    icon: "../assets/chess-icons/light/chess-pawn-light.svg",
+    points: 5,
+    piece: "pawn",
+  },
 ];
 
 const blackPieces = [
@@ -809,7 +809,7 @@ const getKingPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
       `${xAxis[xAxisIndex + 1]}-${yAxis[yAxisIndex - 1]}`
     );
 
-    if (block.childrenElementCount > 0) {
+    if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
         possibleMoves.push(block);
       }
@@ -848,7 +848,7 @@ const switchPlayerAndEnemy = () => {
 };
 
 //funkcija koja proverava da li je sah - TESKA I VELIKA
-const isCheck = (position, myKing = true) => {
+const isCheck = (kingPosition, myKing = true) => {
   let splittedPos = kingPosition.split("-");
 
   let xAxisPos = splittedPos[0];
@@ -863,9 +863,9 @@ const isCheck = (position, myKing = true) => {
 
   //ne ukljucujemo pawn jer je njegov napad ukljucen u lovca
   let possibleMoves = Array.prototype.concat(
-    (getRookPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex)),
-    (getBishopPossibleMoves = (xAxisIndex, yAxisIndex)),
-    (getKnightPossibleMoves = (xAxisIndex, yAxisIndex))
+    getRookPossibleMoves(xAxisPos, yAxisPos, xAxisIndex, yAxisIndex),
+    getBishopPossibleMoves(xAxisIndex, yAxisIndex),
+    getKnightPossibleMoves(xAxisIndex, yAxisIndex)
   );
 
   //proveravamo da li je kralj na nekom od ovih mogucih napada
@@ -881,6 +881,8 @@ const isCheck = (position, myKing = true) => {
 
       let pieceXAxisIndex = xAxis.findIndex((x) => x === pieceXPos);
       let pieceYAxisIndex = yAxis.findIndex((y) => y === pieceYPos);
+
+      let xyBlockDiffIsTheSame;
 
       switch (piece.dataset.piece) {
         case "pawn":
@@ -948,10 +950,10 @@ const isCheck = (position, myKing = true) => {
           }
           break;
         case "bishop":
-          //da li se lovac krece dijagonalno proveramo
-          let xyBlockDiffIsTheSame =
+          xyBlockDiffIsTheSame =
             Math.abs(xAxisIndex - pieceXAxisIndex) ===
             Math.abs(yAxisIndex - pieceYAxisIndex);
+          //da li se lovac krece dijagonalno proveramo
           if (
             (pieceXAxisIndex < xAxisIndex &&
               pieceYAxisIndex > yAxisIndex &&
@@ -974,9 +976,9 @@ const isCheck = (position, myKing = true) => {
           }
           break;
         case "queen":
-          // let xyBlockDiffIsTheSame =
-          //   Math.abs(xAxisIndex - pieceXAxisIndex) ===
-          //   Math.abs(yAxisIndex - pieceYAxisIndex);
+          xyBlockDiffIsTheSame =
+            Math.abs(xAxisIndex - pieceXAxisIndex) ===
+            Math.abs(yAxisIndex - pieceYAxisIndex);
           if (
             pieceXPos === xAxisPos ||
             pieceYPos === yAxisPos ||
@@ -989,11 +991,9 @@ const isCheck = (position, myKing = true) => {
             (pieceXAxisIndex > xAxisIndex &&
               pieceYAxisIndex > yAxisIndex &&
               xyBlockDiffIsTheSame) ||
-            (
-              pieceXAxisIndex > xAxisIndex &&
+            (pieceXAxisIndex > xAxisIndex &&
               pieceYAxisIndex < yAxisIndex &&
-              xyBlockDiffIsTheSame
-            )()
+              xyBlockDiffIsTheSame)
           ) {
             if (!myKing) {
               switchPlayerAndEnemy();
@@ -1015,7 +1015,7 @@ const isCheck = (position, myKing = true) => {
   return false;
 };
 
-const isCheckmate = (enemyKingPossition) => {
+const isCheckmate = (enemyKingPosition) => {
   switchPlayerAndEnemy();
 
   let splittedPos = kingPosition.split("-");
@@ -1026,7 +1026,7 @@ const isCheckmate = (enemyKingPossition) => {
   let xAxisIndex = xAxis.findIndex((x) => x === xAxisPos);
   let yAxisIndex = yAxis.findIndex((y) => y === yAxisPos);
 
-  let getKingPossibleMoves = getKingPossibleMoves(
+  let kingPossibleMoves = getKingPossibleMoves(
     xAxisPos,
     yAxisPos,
     xAxisIndex,
@@ -1041,7 +1041,7 @@ const isCheckmate = (enemyKingPossition) => {
     if (myPiece.dataset.piece === "king") continue;
 
     let myPieceXPos = myPiece.parentNode.id.split("-")[0];
-
+    //ovde smo dodali plus da konvertujemo u int jer je + u JS unarni operator (string->int)
     let myPieceYPos = +myPiece.parentNode.id.split("-")[1];
 
     let myPieceXAxisIndex = xAxis.findIndex((x) => x === myPieceXPos);
@@ -1056,8 +1056,8 @@ const isCheckmate = (enemyKingPossition) => {
           myPieceYPos,
           myPieceXAxisIndex,
           myPieceYAxisIndex
-        );
-        break; // Ova fja ce vratiti niz sa svim mogucim potezima
+        ); // Ova fja ce vratiti niz sa svim mogucim potezima
+        break;
       case "rook":
         piecePossibleMoves = getRookPossibleMoves(
           myPieceXPos,
@@ -1077,8 +1077,8 @@ const isCheckmate = (enemyKingPossition) => {
           myPieceXAxisIndex,
           myPieceYAxisIndex
         );
+        //za kraljicu je zapravo unija lovca i topa
         break;
-      //za kraljicu je zapravo unija lovca i topa
       case "queen":
         piecePossibleMoves = Array.prototype.concat(
           getRookPossibleMoves(
@@ -1089,8 +1089,6 @@ const isCheckmate = (enemyKingPossition) => {
           ),
           getBishopPossibleMoves(myPieceXAxisIndex, myPieceYAxisIndex)
         );
-        break;
-
       default:
         break;
     }
@@ -1098,7 +1096,7 @@ const isCheckmate = (enemyKingPossition) => {
     currentBox.innerHTML = "";
 
     for (let j = 0; j < piecePossibleMoves.length; j++) {
-      let possibleMove = piecePossibleMoves[i];
+      let possibleMove = piecePossibleMoves[j];
       let boxToMove = document.getElementById(possibleMove.id);
       let removedPiece = null;
       if (boxToMove.children.length > 0) {
@@ -1108,7 +1106,7 @@ const isCheckmate = (enemyKingPossition) => {
 
       boxToMove.appendChild(myPiece);
 
-      let check = isCheck(enemyKingPossition);
+      let check = isCheck(enemyKingPosition);
 
       boxToMove.innerHTML = "";
 
@@ -1125,8 +1123,7 @@ const isCheckmate = (enemyKingPossition) => {
   }
   switchPlayerAndEnemy();
 
-  if (getKingPossibleMoves.length === 0) {
-    //get
+  if (kingPossibleMoves.length === 0) {
     return true;
   }
 
