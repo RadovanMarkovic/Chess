@@ -343,6 +343,10 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("enemy-timer-updated", minutes, seconds);
   });
 
+  socket.on("check", (roomId) => {
+    socket.to(roomId).emit("king-is-attacked");
+  });
+
   socket.on("join-random", async (user) => {
     try {
       const reply = await redisClient.get("rooms");
