@@ -1090,7 +1090,7 @@ const isCheckmate = (enemyKingPosition) => {
     currentBox.innerHTML = ""
 
     for (let j = 0; j < piecePossibleMoves.length; j++) {
-      let possibleMove = piecePossibleMoves[i] ///////OVDE JE i NA POCETKU NAPISAO, a rasi pise j
+      let possibleMove = piecePossibleMoves[j] ///////OVDE JE i NA POCETKU NAPISAO, a rasi pise j
       let boxToMove = document.getElementById(possibleMove.id)
       let removedPiece = null
       if (boxToMove.children.length > 0) {
