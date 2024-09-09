@@ -35,6 +35,8 @@ let isRightCastlingPerformed = false
 
 let selectedPiece = null
 
+let pawnsToPerformElPassant = {}
+let elPassantPositions = {}
 const lightPieces = [
   {
     position: "A-8",
