@@ -5,6 +5,28 @@
 const xAxis = ["A", "B", "C", "D", "E", "F", "G", "H"]
 const yAxis = [1, 2, 3, 4, 5, 6, 7, 8]
 
+//dodati nizovi za potrebe promocije pijuna
+const lightPiecesEndingPosition = [
+  "A-1",
+  "B-1",
+  "C-1",
+  "D-1",
+  "E-1",
+  "F-1",
+  "G-1",
+  "H-1",
+]
+const blackPiecesEndingPosition = [
+  "A-8",
+  "B-8",
+  "C-8",
+  "D-8",
+  "E-8",
+  "F-8",
+  "G-8",
+  "H-8",
+]
+
 let player = null //zbog testiranja u klipu 32. 25:23 je promenio ovo
 let enemy = null //za sada je promenio u crno 35. 10:50
 
@@ -1026,7 +1048,7 @@ const isCheckmate = (enemyKingPosition) => {
     yAxisIndex
   )
 
-  let myPieces = document.getElementById(`.piece.${player}`)
+  let myPieces = document.querySelectorAll(`.piece.${player}`)
 
   for (let i = 0; i < myPieces.length; i++) {
     let myPiece = myPieces[i]
@@ -1133,4 +1155,32 @@ const getKingPosition = (pieceColor) => {
       return pieces[i].parentNode.id
     }
   }
+}
+
+const isPawnAtTheEndOfTheBoard = (currentPlayer, pawnPosition) => {
+  let isAtTheEndOfBoard = false
+
+  let positionIndex
+
+  if (currentPlayer === "light") {
+    positionIndex = lightPiecesEndingPosition.findIndex(
+      (pos) => pos === pawnPosition
+    )
+
+    //ako smo pronasli index
+    if (positionIndex !== -1) {
+      isAtTheEndOfBoard = true
+    }
+  } else {
+    positionIndex = blackPiecesEndingPosition.findIndex(
+      (pos) => pos === pawnPosition
+    )
+
+    //ako smo pronasli index
+    if (positionIndex !== -1) {
+      isAtTheEndOfBoard = true
+    }
+  }
+
+  return isAtTheEndOfBoard
 }
