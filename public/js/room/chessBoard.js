@@ -37,6 +37,7 @@ let selectedPiece = null
 
 let pawnsToPerformElPassant = {}
 let elPassantPositions = {}
+
 const lightPieces = [
   {
     position: "A-8",
@@ -235,6 +236,11 @@ const blackPieces = [
     piece: "pawn",
   },
 ]
+
+const totalPiecesPoints = lightPieces.reduce(
+  (acc, piece) => acc + piece.points,
+  0
+)
 
 //Funkcije za kretanje figurica po tabli
 

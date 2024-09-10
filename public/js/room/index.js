@@ -696,9 +696,24 @@ const endGame = (winner = null) => {
   }
 
   if (winner) {
-    //TODO: Finish Game Over functionality
+    winnerUserName.innerText = winner
+
+    let winningPoints = 0
+
+    if (winner === user.username) {
+      winningPoints = ~~((myScore / totalPiecesPoints) * 100) //zaokruzice broj
+      myScoreElement.innerText = +winningPoints
+      enemyScoreElement.innerText = -winningPoints
+      myScoreElement.classList.add("positive-score")
+      socket.emit("update-scores", roomId, winningPoints, -winningPoints)
+    } else {
+      winningPoints = ~~((enemyScore / totalPiecesPoints) * 100) //zaokruzice broj
+      myScoreElement.innerText = -winningPoints
+      enemyScoreElement.innerText = +winningPoints
+      enemyScoreElement.classList.add("positive-score")
+    }
   } else {
-    winnerUserName.innerText = "nobody"
+    winnerUserName.innerText = "Nobody"
   }
 
   gameOverMessageContainer.classList.remove("hidden")
@@ -796,4 +811,20 @@ socket.on("enemy-timer-updated", (minutes, seconds) => {
 
 socket.on("king-is-attacked", () => {
   setKingisAttacked(true)
+})
+
+socket.on("you-lost", (winner, newEnemyScore = null) => {
+  if (newEnemyScore) {
+    enemyScore = newEnemyScore
+  }
+
+  endGame(winner)
+})
+
+socket.on("you-won", () => {
+  emdGame(user.username)
+})
+
+socket.on("draw", () => {
+  endGame()
 })
