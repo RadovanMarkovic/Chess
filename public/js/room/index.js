@@ -697,32 +697,20 @@ const endGame = (winner = null) => {
   }
 
   if (winner) {
-    winnerUserName.innerHTML = winner;
+    winnerUserName.innerText = winner;
 
     let winningPoints = 0;
 
     if (winner === user.username) {
-      //za koriscenje float number
-      console.log(totalPiecesPoints);
-      console.log(winningPoints);
-
-      winningPoints = ~~((myScore / totalPiecesPoints) * 1000);
-
-      //ovde koristi obicno bez plusa, a u else koristi plus ???????
-      myScoreElement.innerText = winningPoints;
+      winningPoints = ~~((myScore / totalPiecesPoints) * 100); //zaokruzice broj
+      myScoreElement.innerText = +winningPoints;
       enemyScoreElement.innerText = -winningPoints;
-
       myScoreElement.classList.add("positive-score");
-
-      //console.log(myScoreElement);
-
       socket.emit("update-scores", roomId, winningPoints, -winningPoints);
     } else {
-      winningPoints = ~~((enemyScore / totalPiecesPoints) * 1000);
-
+      winningPoints = ~~((enemyScore / totalPiecesPoints) * 100); //zaokruzice broj
       myScoreElement.innerText = -winningPoints;
       enemyScoreElement.innerText = +winningPoints;
-
       enemyScoreElement.classList.add("positive-score");
     }
   } else {
@@ -835,7 +823,7 @@ socket.on("you-lost", (winner, newEnemyScore = null) => {
 });
 
 socket.on("you-won", () => {
-  endGame(user.username);
+  emdGame(user.username);
 });
 
 socket.on("draw", () => {
