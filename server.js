@@ -347,6 +347,123 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("king-is-attacked");
   });
 
+  socket.on("checkmate", async (roomId, winner, score, startedAt) => {
+    try {
+      const reply = await redisClient.get(roomId);
+
+      if (reply) {
+        let room = JSON.parse(reply);
+
+        await redisClient.del(`${room.players[0].id}-played-games`);
+        await redisClient.del(`${room.players[1].id}-played-games`);
+
+        room.gameFinished = true;
+
+        await redisClient.set(roomId, JSON.stringify(room));
+
+        socket.to(roomId).emit("you-lost", winner, score);
+
+        let query = `
+          INSERT INTO games(timer,moves,user_id_light, user_id_black, started_at)
+          VALUES ('${room.time + ""}', '${JSON.stringify(room.moves)}' ,${
+          room.players[0].id
+        },${room.players[1].id},'${startedAt + ""}')
+        `;
+
+        db.query(query, (err) => {
+          if (err) throw err;
+        });
+      }
+    } catch (error) {
+      console.error("Error", error);
+    }
+  });
+
+  socket.on("timer-ended", async (roomId, loser, startedAt) => {
+    try {
+      const reply = await redisClient.get(roomId);
+
+      if (reply) {
+        let room = JSON.parse(reply);
+
+        await redisClient.del(`${room.players[0].id}-played-games`);
+        await redisClient.del(`${room.players[1].id}-played-games`);
+
+        room.gameFinished = true;
+
+        await redisClient.set(roomId, JSON.stringify(room));
+
+        let winner;
+        if (room.players[0].username === loser) {
+          winner = room.players[1].username;
+        } else {
+          winner = room.players[0].username;
+        }
+
+        socket.emit("you-lost", winner);
+        socket.to(roomId).emit("you-won");
+
+        let query = `
+          INSERT INTO games(timer, moves, user_id_light, user_id_black, started_at)
+          VALUES ('${room.time + ""}', '${JSON.stringify(room.moves)}', ${
+          room.players[0].id
+        }, ${room.players[1].id}, '${startedAt + ""}')
+        `;
+
+        db.query(query, (err) => {
+          if (err) throw err;
+        });
+      } else {
+        socket.emit("error", `Room with id '${roomId}' does not exist`);
+      }
+    } catch (err) {
+      console.error("Error processing timer-ended event:", err);
+      socket.emit("error", "An error occurred while processing the event.");
+    }
+  });
+
+  socket.on("draw", (roomId) => {
+    socket.to(roomId).emit("draw");
+  });
+
+  socket.on("update-score", async (roomId, playerOneScore, playerTwoScore) => {
+    try {
+      const reply = await redisClient.get(roomId);
+
+      if (reply) {
+        let room = JSON.parse(reply);
+
+        let userOne = room.players[0];
+        let userTwo = room.players[1];
+
+        userOne.user_points += playerOneScore;
+        userTwo.user_points += playerTwoScore;
+
+        let query = `
+          CALL updateScores(
+            '${userOne.username}',
+            ${Math.max(userOne.user_points, 0)},
+            '${userTwo.username}',
+            ${Math.max(userTwo.user_points, 0)}
+          )
+        `;
+
+        db.query(query, (err) => {
+          if (err) throw err;
+          
+          await redisClient.set(userOne.username + "-score-updated", "true");
+          await redisClient.set(userTwo.username + "-score-updated", "true");
+        });
+
+      } else {
+        socket.emit("error", `Room with id '${roomId}' does not exist`);
+      }
+    } catch (err) {
+      console.error("Error updating score:", err);
+      socket.emit("error", "An error occurred while updating the score.");
+    }
+  });
+
   socket.on("join-random", async (user) => {
     try {
       const reply = await redisClient.get("rooms");
@@ -396,6 +513,7 @@ io.on("connection", (socket) => {
 
   socket.on("send-message", (message, user, roomId = null) => {
     if (roomId) {
+      console.log(message);
       socket.to(roomId).emit("receive-message", message, user);
     } else {
       socket.broadcast.emit("receive-message", message, user, true);

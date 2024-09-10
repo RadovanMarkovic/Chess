@@ -2,8 +2,8 @@
 //constant variables (initial values for the game)
 //====================================
 
-const xAxis = ["A", "B", "C", "D", "E", "F", "G", "H"]
-const yAxis = [1, 2, 3, 4, 5, 6, 7, 8]
+const xAxis = ["A", "B", "C", "D", "E", "F", "G", "H"];
+const yAxis = [1, 2, 3, 4, 5, 6, 7, 8];
 
 //dodati nizovi za potrebe promocije pijuna
 const lightPiecesEndingPosition = [
@@ -15,7 +15,7 @@ const lightPiecesEndingPosition = [
   "F-1",
   "G-1",
   "H-1",
-]
+];
 const blackPiecesEndingPosition = [
   "A-8",
   "B-8",
@@ -25,18 +25,19 @@ const blackPiecesEndingPosition = [
   "F-8",
   "G-8",
   "H-8",
-]
+];
 
-let player = null //zbog testiranja u klipu 32. 25:23 je promenio ovo
-let enemy = null //za sada je promenio u crno 35. 10:50
+let player = null; //zbog testiranja u klipu 32. 25:23 je promenio ovo
+let enemy = null; //za sada je promenio u crno 35. 10:50
 
-let isLeftCastlingPerformed = false
-let isRightCastlingPerformed = false
+let isLeftCastlingPerformed = false;
+let isRightCastlingPerformed = false;
 
-let selectedPiece = null
+let selectedPiece = null;
 
-let pawnsToPerformElPassant = {}
-let elPassantPositions = {}
+let pawnsToPerformElPassant = {};
+let elPassantPositions = {};
+
 const lightPieces = [
   {
     position: "A-8",
@@ -134,7 +135,7 @@ const lightPieces = [
     points: 5,
     piece: "pawn",
   },
-]
+];
 
 const blackPieces = [
   {
@@ -234,7 +235,12 @@ const blackPieces = [
     points: 5,
     piece: "pawn",
   },
-]
+];
+
+const totalPiecesPoints = lightPieces.reduce(
+  (acc, piece) => acc + piece.points,
+  0
+);
 
 //Funkcije za kretanje figurica po tabli
 
@@ -243,55 +249,55 @@ const getPawnPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
   //console.log(xAxisIndex)
 
   //Proveravamo da li je beli ili crni jer se drugacije krecu
-  let possibleMoves = []
+  let possibleMoves = [];
 
-  let forwardMoves = 1
+  let forwardMoves = 1;
 
-  let yAxisIndexForCapture = null
-  let canMoveForward = false
+  let yAxisIndexForCapture = null;
+  let canMoveForward = false;
 
   if (player === "light") {
     if (yAxisPos === 7) {
-      forwardMoves = 2
+      forwardMoves = 2;
     }
 
-    yAxisIndexForCapture = yAxisIndex - 1
-    canMoveForward = yAxisIndex > 0 // Mozemo napred ako je ovo vece od 0
+    yAxisIndexForCapture = yAxisIndex - 1;
+    canMoveForward = yAxisIndex > 0; // Mozemo napred ako je ovo vece od 0
 
     for (let y = yAxisIndex - 1; y >= yAxisIndex - forwardMoves; y--) {
       if (y < 0) {
-        break
+        break;
       }
 
-      let box = document.getElementById(`${xAxisPos}-${yAxis[y]}`)
+      let box = document.getElementById(`${xAxisPos}-${yAxis[y]}`);
 
       if (box.childElementCount === 0) {
         // Ako na tom polju ne postoji nijedna druga figura, ubaci to u moguce poteze jer pesak ide napred
-        possibleMoves.push(box)
+        possibleMoves.push(box);
       } else {
-        break
+        break;
       }
     }
   } else {
     if (yAxisPos === 2) {
-      forwardMoves = 2
+      forwardMoves = 2;
     }
 
-    yAxisIndexForCapture = yAxisIndex + 1
-    canMoveForward = yAxisIndex > 0 // Mozemo napred ako je ovo vece od 0
+    yAxisIndexForCapture = yAxisIndex + 1;
+    canMoveForward = yAxisIndex > 0; // Mozemo napred ako je ovo vece od 0
 
     for (let y = yAxisIndex + 1; y <= yAxisIndex + forwardMoves; y++) {
       if (y > yAxis.length) {
-        break
+        break;
       }
 
-      let box = document.getElementById(`${xAxisPos}-${yAxis[y]}`)
+      let box = document.getElementById(`${xAxisPos}-${yAxis[y]}`);
 
       if (box.childElementCount === 0) {
         // Ako na tom polju ne postoji nijedna druga figura, ubaci to u moguce poteze jer pesak ide napred
-        possibleMoves.push(box)
+        possibleMoves.push(box);
       } else {
-        break
+        break;
       }
     }
   }
@@ -301,42 +307,42 @@ const getPawnPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
     if (xAxisIndex > 0) {
       let pieceToCaptureLeft = document.getElementById(
         `${xAxis[xAxisIndex - 1]}-${yAxis[yAxisIndexForCapture]}`
-      )
+      );
 
       if (
         pieceToCaptureLeft.childElementCount > 0 &&
         pieceToCaptureLeft.children[0].classList.contains(enemy)
       ) {
-        possibleMoves.push(pieceToCaptureLeft)
+        possibleMoves.push(pieceToCaptureLeft);
       }
     }
 
     if (xAxisIndex < xAxis.length - 1) {
       let pieceToCaptureRight = document.getElementById(
         `${xAxis[xAxisIndex + 1]}-${yAxis[yAxisIndexForCapture]}`
-      )
+      );
 
       if (
         pieceToCaptureRight.childElementCount > 0 &&
         pieceToCaptureRight.children[0].classList.contains(enemy)
       ) {
-        possibleMoves.push(pieceToCaptureRight)
+        possibleMoves.push(pieceToCaptureRight);
       }
     }
   }
   //TODO: CHECK FOR EL PASSANT (NE RADIMO GA)
-  return possibleMoves
-}
+  return possibleMoves;
+};
 
 const getRookPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
-  let possibleMoves = []
+  let possibleMoves = [];
 
-  let topCollision = false
-  let bottomCollision = false
-  let rightCollision = false
-  let leftCollision = false
-  let yInc = 1
-  let xInc = 1
+  let topCollision = false;
+  let bottomCollision = false;
+  let rightCollision = false;
+  let leftCollision = false;
+  let yInc = 1;
+  let xInc = 1;
 
   while (
     !topCollision ||
@@ -349,43 +355,43 @@ const getRookPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
         if (!topCollision) {
           let topBlock = document.getElementById(
             `${xAxisPos}-${yAxis[yAxisIndex + yInc]}`
-          )
+          );
 
           if (topBlock.childElementCount > 0) {
             if (topBlock.children[0].classList.contains(enemy)) {
-              possibleMoves.push(topBlock)
+              possibleMoves.push(topBlock);
             }
 
-            topCollision = true
+            topCollision = true;
           } else {
-            possibleMoves.push(topBlock)
+            possibleMoves.push(topBlock);
           }
         }
       } else {
-        topCollision = true
+        topCollision = true;
       }
 
       if (yAxisIndex - yInc > -1) {
         if (!bottomCollision) {
           let bottomBlock = document.getElementById(
             `${xAxisPos}-${yAxis[yAxisIndex - yInc]}`
-          )
+          );
 
           if (bottomBlock.childElementCount > 0) {
             if (bottomBlock.children[0].classList.contains(enemy)) {
-              possibleMoves.push(bottomBlock)
+              possibleMoves.push(bottomBlock);
             }
 
-            bottomCollision = true
+            bottomCollision = true;
           } else {
-            possibleMoves.push(bottomBlock)
+            possibleMoves.push(bottomBlock);
           }
         }
       } else {
-        bottomCollision = true
+        bottomCollision = true;
       }
 
-      yInc++
+      yInc++;
     }
 
     if (!leftCollision || !rightCollision) {
@@ -393,105 +399,105 @@ const getRookPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
         if (!rightCollision) {
           let rightBlock = document.getElementById(
             `${xAxis[xAxisIndex + xInc]}-${yAxisPos}`
-          )
+          );
 
           if (rightBlock.childElementCount > 0) {
             if (rightBlock.children[0].classList.contains(enemy)) {
-              possibleMoves.push(rightBlock)
+              possibleMoves.push(rightBlock);
             } else {
               if (!isLeftCastlingPerformed) {
-                let pieceCollideWith = rightBlock.children[0]
+                let pieceCollideWith = rightBlock.children[0];
 
                 if (pieceCollideWith.dataset.piece === "king") {
-                  let myKingPosition = rightBlock.id
+                  let myKingPosition = rightBlock.id;
 
                   if (player === "light") {
                     if (
                       xAxisPos + "-" + yAxisPos === "A-8" &&
                       myKingPosition === "E-8"
                     ) {
-                      possibleMoves.push(rightBlock)
+                      possibleMoves.push(rightBlock);
                     }
                   } else {
                     if (
                       xAxisPos + "-" + yAxisPos === "A-1" &&
                       myKingPosition === "E-1"
                     ) {
-                      possibleMoves.push(rightBlock)
+                      possibleMoves.push(rightBlock);
                     }
                   }
                 }
               }
             }
-            rightCollision = true
+            rightCollision = true;
           } else {
-            possibleMoves.push(rightBlock)
+            possibleMoves.push(rightBlock);
           }
         }
       } else {
-        rightCollision = true
+        rightCollision = true;
       }
 
       if (xAxisIndex - xInc > -1) {
         if (!leftCollision) {
           let leftBlock = document.getElementById(
             `${xAxis[xAxisIndex - xInc]}-${yAxisPos}`
-          )
+          );
 
           if (leftBlock.childElementCount > 0) {
             if (leftBlock.children[0].classList.contains(enemy)) {
-              possibleMoves.push(leftBlock)
+              possibleMoves.push(leftBlock);
             } else {
               if (!isLeftCastlingPerformed) {
-                let pieceCollideWith = leftBlock.children[0]
+                let pieceCollideWith = leftBlock.children[0];
 
                 if (pieceCollideWith.dataset.piece === "king") {
-                  let myKingPosition = leftBlock.id
+                  let myKingPosition = leftBlock.id;
 
                   if (player === "light") {
                     if (
                       xAxisPos + "-" + yAxisPos === "H-8" &&
                       myKingPosition === "E-8"
                     ) {
-                      possibleMoves.push(leftBlock)
+                      possibleMoves.push(leftBlock);
                     }
                   } else {
                     if (
                       xAxisPos + "-" + yAxisPos === "H-1" &&
                       myKingPosition === "E-1"
                     ) {
-                      possibleMoves.push(leftBlock)
+                      possibleMoves.push(leftBlock);
                     }
                   }
                 }
               }
             }
-            leftCollision = true
+            leftCollision = true;
           } else {
-            possibleMoves.push(leftBlock)
+            possibleMoves.push(leftBlock);
           }
         }
       } else {
-        leftCollision = true
+        leftCollision = true;
       }
 
-      xInc++
+      xInc++;
     }
   }
 
-  return possibleMoves
-}
+  return possibleMoves;
+};
 
 const getBishopPossibleMoves = (xAxisIndex, yAxisIndex) => {
-  let possibleMoves = []
+  let possibleMoves = [];
 
-  let topLeftCollision = false
-  let topRightCollision = false
-  let bottomLeftCollision = false
-  let bottomRightCollision = false
+  let topLeftCollision = false;
+  let topRightCollision = false;
+  let bottomLeftCollision = false;
+  let bottomRightCollision = false;
 
-  let yInc = 1
-  let xInc = 1
+  let yInc = 1;
+  let xInc = 1;
 
   while (
     !topLeftCollision ||
@@ -505,21 +511,21 @@ const getBishopPossibleMoves = (xAxisIndex, yAxisIndex) => {
         if (!topLeftCollision) {
           let topLeftBlock = document.getElementById(
             `${xAxis[xAxisIndex - xInc]}-${yAxis[yAxisIndex + yInc]}`
-          )
+          );
 
           if (topLeftBlock.childElementCount > 0) {
             //proveramo da li je enemy figurica
             if (topLeftBlock.children[0].classList.contains(enemy)) {
-              possibleMoves.push(topLeftBlock)
+              possibleMoves.push(topLeftBlock);
             }
 
-            topLeftCollision = true
+            topLeftCollision = true;
           } else {
-            possibleMoves.push(topLeftBlock)
+            possibleMoves.push(topLeftBlock);
           }
         }
       } else {
-        topLeftCollision = true
+        topLeftCollision = true;
       }
     }
 
@@ -528,21 +534,21 @@ const getBishopPossibleMoves = (xAxisIndex, yAxisIndex) => {
       if (!topRightCollision) {
         let topRightBlock = document.getElementById(
           `${xAxis[xAxisIndex + xInc]}-${yAxis[yAxisIndex + yInc]}`
-        )
+        );
 
         if (topRightBlock.childElementCount > 0) {
           //proveramo da li je enemy figurica
           if (topRightBlock.children[0].classList.contains(enemy)) {
-            possibleMoves.push(topRightBlock)
+            possibleMoves.push(topRightBlock);
           }
 
-          topRightCollision = true
+          topRightCollision = true;
         } else {
-          possibleMoves.push(topRightBlock)
+          possibleMoves.push(topRightBlock);
         }
       }
     } else {
-      topRightCollision = true
+      topRightCollision = true;
     }
 
     //bottom left
@@ -552,21 +558,21 @@ const getBishopPossibleMoves = (xAxisIndex, yAxisIndex) => {
         if (!bottomLeftCollision) {
           let bottomLeftBlock = document.getElementById(
             `${xAxis[xAxisIndex - xInc]}-${yAxis[yAxisIndex - yInc]}`
-          )
+          );
 
           if (bottomLeftBlock.childElementCount > 0) {
             //proveramo da li je enemy figurica
             if (bottomLeftBlock.children[0].classList.contains(enemy)) {
-              possibleMoves.push(bottomLeftBlock)
+              possibleMoves.push(bottomLeftBlock);
             }
 
-            bottomLeftCollision = true
+            bottomLeftCollision = true;
           } else {
-            possibleMoves.push(bottomLeftBlock)
+            possibleMoves.push(bottomLeftBlock);
           }
         }
       } else {
-        bottomLeftCollision = true
+        bottomLeftCollision = true;
       }
     }
 
@@ -575,45 +581,45 @@ const getBishopPossibleMoves = (xAxisIndex, yAxisIndex) => {
       if (!bottomRightCollision) {
         let bottomRightBlock = document.getElementById(
           `${xAxis[xAxisIndex + xInc]}-${yAxis[yAxisIndex - yInc]}`
-        )
+        );
 
         if (bottomRightBlock.childElementCount > 0) {
           //proveramo da li je enemy figurica
           if (bottomRightBlock.children[0].classList.contains(enemy)) {
-            possibleMoves.push(bottomRightBlock)
+            possibleMoves.push(bottomRightBlock);
           }
 
-          bottomRightCollision = true
+          bottomRightCollision = true;
         } else {
-          possibleMoves.push(bottomRightBlock)
+          possibleMoves.push(bottomRightBlock);
         }
       }
     } else {
-      bottomRightCollision = true
+      bottomRightCollision = true;
     }
 
-    xInc++
-    yInc++
+    xInc++;
+    yInc++;
   }
-  return possibleMoves
-}
+  return possibleMoves;
+};
 
 //LOVAC MOZE DA POJEDE KRALJA!!!
 const getKnightPossibleMoves = (xAxisIndex, yAxisIndex) => {
-  let possibleMoves = []
+  let possibleMoves = [];
 
   //LEFT-UP
   if (xAxisIndex - 2 > -1 && yAxisIndex + 1 < yAxis.length) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex - 2]}-${yAxis[yAxisIndex + 1]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
@@ -621,14 +627,14 @@ const getKnightPossibleMoves = (xAxisIndex, yAxisIndex) => {
   if (xAxisIndex - 2 > -1 && yAxisIndex - 1 > -1) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex - 2]}-${yAxis[yAxisIndex - 1]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
@@ -636,14 +642,14 @@ const getKnightPossibleMoves = (xAxisIndex, yAxisIndex) => {
   if (xAxisIndex + 2 < xAxis.length && yAxisIndex + 1 < yAxis.length) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex + 2]}-${yAxis[yAxisIndex + 1]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
@@ -651,14 +657,14 @@ const getKnightPossibleMoves = (xAxisIndex, yAxisIndex) => {
   if (xAxisIndex + 2 < xAxis.length && yAxisIndex - 1 > -1) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex + 2]}-${yAxis[yAxisIndex - 1]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
@@ -666,14 +672,14 @@ const getKnightPossibleMoves = (xAxisIndex, yAxisIndex) => {
   if (xAxisIndex - 1 > -1 && yAxisIndex + 2 < yAxis.length) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex - 1]}-${yAxis[yAxisIndex + 2]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
@@ -681,14 +687,14 @@ const getKnightPossibleMoves = (xAxisIndex, yAxisIndex) => {
   if (xAxisIndex + 1 < xAxis.length && yAxisIndex + 2 < yAxis.length) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex + 1]}-${yAxis[yAxisIndex + 2]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
@@ -696,14 +702,14 @@ const getKnightPossibleMoves = (xAxisIndex, yAxisIndex) => {
   if (xAxisIndex - 1 > -1 && yAxisIndex - 2 > -1) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex - 1]}-${yAxis[yAxisIndex - 2]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
@@ -711,72 +717,72 @@ const getKnightPossibleMoves = (xAxisIndex, yAxisIndex) => {
   if (xAxisIndex + 1 < xAxis.length && yAxisIndex - 2 > -1) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex + 1]}-${yAxis[yAxisIndex - 2]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
-  return possibleMoves
-}
+  return possibleMoves;
+};
 
 const getKingPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
-  let possibleMoves = []
+  let possibleMoves = [];
 
   //TOP
   if (yAxisIndex + 1 < yAxis.length) {
-    let block = document.getElementById(`${xAxisPos}-${yAxis[yAxisIndex + 1]}`)
+    let block = document.getElementById(`${xAxisPos}-${yAxis[yAxisIndex + 1]}`);
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
   //BOTTOM
   if (yAxisIndex - 1 > -1) {
-    let block = document.getElementById(`${xAxisPos}-${yAxis[yAxisIndex - 1]}`)
+    let block = document.getElementById(`${xAxisPos}-${yAxis[yAxisIndex - 1]}`);
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
   //LEFT
   if (xAxisIndex - 1 > -1) {
-    let block = document.getElementById(`${xAxis[xAxisIndex - 1]}-${yAxisPos}`)
+    let block = document.getElementById(`${xAxis[xAxisIndex - 1]}-${yAxisPos}`);
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
   //RIGHT
   if (xAxisIndex + 1 < xAxis.length) {
-    let block = document.getElementById(`${xAxis[xAxisIndex + 1]}-${yAxisPos}`)
+    let block = document.getElementById(`${xAxis[xAxisIndex + 1]}-${yAxisPos}`);
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
@@ -784,14 +790,14 @@ const getKingPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
   if (xAxisIndex - 1 > -1 && yAxisIndex + 1 < yAxis.length) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex - 1]}-${yAxis[yAxisIndex + 1]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
@@ -799,14 +805,14 @@ const getKingPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
   if (xAxisIndex + 1 < xAxis.length && yAxisIndex + 1 < yAxis.length) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex + 1]}-${yAxis[yAxisIndex + 1]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
@@ -814,14 +820,14 @@ const getKingPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
   if (xAxisIndex - 1 > -1 && yAxisIndex - 1 > -1) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex - 1]}-${yAxis[yAxisIndex - 1]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
@@ -829,53 +835,58 @@ const getKingPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {
   if (xAxisIndex + 1 < xAxis.length && yAxisIndex - 1 > -1) {
     let block = document.getElementById(
       `${xAxis[xAxisIndex + 1]}-${yAxis[yAxisIndex - 1]}`
-    )
+    );
 
     if (block.childElementCount > 0) {
       if (block.children[0].classList.contains(enemy)) {
-        possibleMoves.push(block)
+        possibleMoves.push(block);
       }
     } else {
-      possibleMoves.push(block)
+      possibleMoves.push(block);
     }
   }
 
   //ukljucujemo funkciju koja proverava da li je sah i vraca moguce opcije za kinga
   possibleMoves = possibleMoves.filter((possibleMove) => {
-    let kingPosition = possibleMove.id
+    let kingPosition = possibleMove.id;
 
     if (!isCheck(kingPosition)) {
-      return possibleMove
+      return possibleMove;
     }
-  })
+  });
 
-  return possibleMoves
-}
+  return possibleMoves;
+};
 
-const getQueenPossibleMoves = (xAxisPos, yAxisPos, xAxisIndex, yAxisIndex) => {}
+const getQueenPossibleMoves = (
+  xAxisPos,
+  yAxisPos,
+  xAxisIndex,
+  yAxisIndex
+) => {};
 
 const switchPlayerAndEnemy = () => {
   if (player === "light") {
-    player = "black"
-    enemy = "light"
+    player = "black";
+    enemy = "light";
   } else {
-    player = "light"
-    enemy = "black"
+    player = "light";
+    enemy = "black";
   }
-}
+};
 
 //funkcija koja proverava da li je sah - TESKA I VELIKA
 const isCheck = (kingPosition, myKing = true) => {
-  let splittedPos = kingPosition.split("-")
+  let splittedPos = kingPosition.split("-");
 
-  let xAxisPos = splittedPos[0]
-  let yAxisPos = +splittedPos[1]
+  let xAxisPos = splittedPos[0];
+  let yAxisPos = +splittedPos[1];
 
-  let xAxisIndex = xAxis.findIndex((x) => x === xAxisPos)
-  let yAxisIndex = yAxis.findIndex((y) => y === yAxisPos)
+  let xAxisIndex = xAxis.findIndex((x) => x === xAxisPos);
+  let yAxisIndex = yAxis.findIndex((y) => y === yAxisPos);
 
   if (!myKing) {
-    switchPlayerAndEnemy()
+    switchPlayerAndEnemy();
   }
 
   //ne ukljucujemo pawn jer je njegov napad ukljucen u lovca
@@ -883,23 +894,23 @@ const isCheck = (kingPosition, myKing = true) => {
     getRookPossibleMoves(xAxisPos, yAxisPos, xAxisIndex, yAxisIndex),
     getBishopPossibleMoves(xAxisIndex, yAxisIndex),
     getKnightPossibleMoves(xAxisIndex, yAxisIndex)
-  )
+  );
 
   //proveravamo da li je kralj na nekom od ovih mogucih napada
   for (let i = 0; i < possibleMoves.length; i++) {
-    let box = possibleMoves[i]
+    let box = possibleMoves[i];
 
     if (box.children.length > 0) {
-      let piece = box.children[0]
+      let piece = box.children[0];
 
-      let pieceXPos = box.id.split("-")[0]
+      let pieceXPos = box.id.split("-")[0];
       //ovde smo dodali plus da konvertujemo u int jer je + u JS unarni operator (string->int)
-      let pieceYPos = +box.id.split("-")[1]
+      let pieceYPos = +box.id.split("-")[1];
 
-      let pieceXAxisIndex = xAxis.findIndex((x) => x === pieceXPos)
-      let pieceYAxisIndex = yAxis.findIndex((y) => y === pieceYPos)
+      let pieceXAxisIndex = xAxis.findIndex((x) => x === pieceXPos);
+      let pieceYAxisIndex = yAxis.findIndex((y) => y === pieceYPos);
 
-      let xyBlockDiffIsTheSame
+      let xyBlockDiffIsTheSame;
 
       switch (piece.dataset.piece) {
         case "pawn":
@@ -912,9 +923,9 @@ const isCheck = (kingPosition, myKing = true) => {
                 pieceYAxisIndex === yAxisIndex + 1)
             ) {
               if (!myKing) {
-                switchPlayerAndEnemy()
+                switchPlayerAndEnemy();
               }
-              return true
+              return true;
             }
           } else {
             if (
@@ -925,12 +936,12 @@ const isCheck = (kingPosition, myKing = true) => {
                 pieceYAxisIndex === yAxisIndex - 1)
             ) {
               if (!myKing) {
-                switchPlayerAndEnemy()
+                switchPlayerAndEnemy();
               }
-              return true
+              return true;
             }
           }
-          break
+          break;
         case "knight":
           if (
             (pieceXAxisIndex === xAxisIndex - 1 &&
@@ -951,25 +962,25 @@ const isCheck = (kingPosition, myKing = true) => {
               pieceYAxisIndex === yAxisIndex - 1)
           ) {
             if (!myKing) {
-              switchPlayerAndEnemy()
+              switchPlayerAndEnemy();
             }
 
-            return true
+            return true;
           }
-          break
+          break;
         case "rook":
           if (pieceXPos === xAxisPos || pieceYPos === yAxisPos) {
             if (!myKing) {
-              switchPlayerAndEnemy()
+              switchPlayerAndEnemy();
             }
 
-            return true
+            return true;
           }
-          break
+          break;
         case "bishop":
           xyBlockDiffIsTheSame =
             Math.abs(xAxisIndex - pieceXAxisIndex) ===
-            Math.abs(yAxisIndex - pieceYAxisIndex)
+            Math.abs(yAxisIndex - pieceYAxisIndex);
           //da li se lovac krece dijagonalno proveramo
           if (
             (pieceXAxisIndex < xAxisIndex &&
@@ -986,16 +997,16 @@ const isCheck = (kingPosition, myKing = true) => {
               xyBlockDiffIsTheSame)
           ) {
             if (!myKing) {
-              switchPlayerAndEnemy()
+              switchPlayerAndEnemy();
             }
 
-            return true
+            return true;
           }
-          break
+          break;
         case "queen":
           xyBlockDiffIsTheSame =
             Math.abs(xAxisIndex - pieceXAxisIndex) ===
-            Math.abs(yAxisIndex - pieceYAxisIndex)
+            Math.abs(yAxisIndex - pieceYAxisIndex);
           if (
             pieceXPos === xAxisPos ||
             pieceYPos === yAxisPos ||
@@ -1013,58 +1024,58 @@ const isCheck = (kingPosition, myKing = true) => {
               xyBlockDiffIsTheSame)
           ) {
             if (!myKing) {
-              switchPlayerAndEnemy()
+              switchPlayerAndEnemy();
             }
 
-            return true
+            return true;
           }
-          break
+          break;
         default:
-          break
+          break;
       }
     }
   }
 
   if (!myKing) {
-    switchPlayerAndEnemy()
+    switchPlayerAndEnemy();
   }
 
-  return false
-}
+  return false;
+};
 
 const isCheckmate = (enemyKingPosition) => {
-  switchPlayerAndEnemy()
-  //OVO SAM PROMENIO, NJEMU PISE SAMO kingPosition.split("-"), a nema kingPosition
-  let splittedPos = enemyKingPosition.split("-")
+  switchPlayerAndEnemy();
 
-  let xAxisPos = splittedPos[0]
-  let yAxisPos = +splittedPos[1]
+  let splittedPos = enemyKingPosition.split("-");
 
-  let xAxisIndex = xAxis.findIndex((x) => x === xAxisPos)
-  let yAxisIndex = yAxis.findIndex((y) => y === yAxisPos)
+  let xAxisPos = splittedPos[0];
+  let yAxisPos = +splittedPos[1];
+
+  let xAxisIndex = xAxis.findIndex((x) => x === xAxisPos);
+  let yAxisIndex = yAxis.findIndex((y) => y === yAxisPos);
 
   let kingPossibleMoves = getKingPossibleMoves(
     xAxisPos,
     yAxisPos,
     xAxisIndex,
     yAxisIndex
-  )
+  );
 
-  let myPieces = document.querySelectorAll(`.piece.${player}`)
+  let myPieces = document.querySelectorAll(`.piece.${player}`);
 
   for (let i = 0; i < myPieces.length; i++) {
-    let myPiece = myPieces[i]
+    let myPiece = myPieces[i];
 
-    if (myPiece.dataset.piece === "king") continue
+    if (myPiece.dataset.piece === "king") continue;
 
-    let myPieceXPos = myPiece.parentNode.id.split("-")[0]
+    let myPieceXPos = myPiece.parentNode.id.split("-")[0];
     //ovde smo dodali plus da konvertujemo u int jer je + u JS unarni operator (string->int)
-    let myPieceYPos = +myPiece.parentNode.id.split("-")[1]
+    let myPieceYPos = +myPiece.parentNode.id.split("-")[1];
 
-    let myPieceXAxisIndex = xAxis.findIndex((x) => x === myPieceXPos)
-    let myPieceYAxisIndex = yAxis.findIndex((y) => y === myPieceYPos)
+    let myPieceXAxisIndex = xAxis.findIndex((x) => x === myPieceXPos);
+    let myPieceYAxisIndex = yAxis.findIndex((y) => y === myPieceYPos);
 
-    let piecePossibleMoves
+    let piecePossibleMoves;
 
     switch (myPiece.dataset.piece) {
       case "pawn":
@@ -1073,29 +1084,29 @@ const isCheckmate = (enemyKingPosition) => {
           myPieceYPos,
           myPieceXAxisIndex,
           myPieceYAxisIndex
-        ) // Ova fja ce vratiti niz sa svim mogucim potezima
-        break
+        ); // Ova fja ce vratiti niz sa svim mogucim potezima
+        break;
       case "rook":
         piecePossibleMoves = getRookPossibleMoves(
           myPieceXPos,
           myPieceYPos,
           myPieceXAxisIndex,
           myPieceYAxisIndex
-        )
-        break
+        );
+        break;
       case "bishop":
         piecePossibleMoves = getBishopPossibleMoves(
           myPieceXAxisIndex,
           myPieceYAxisIndex
-        )
-        break
+        );
+        break;
       case "knight":
         piecePossibleMoves = getKnightPossibleMoves(
           myPieceXAxisIndex,
           myPieceYAxisIndex
-        )
+        );
         //za kraljicu je zapravo unija lovca i topa
-        break
+        break;
       case "queen":
         piecePossibleMoves = Array.prototype.concat(
           getRookPossibleMoves(
@@ -1105,84 +1116,84 @@ const isCheckmate = (enemyKingPosition) => {
             myPieceYAxisIndex
           ),
           getBishopPossibleMoves(myPieceXAxisIndex, myPieceYAxisIndex)
-        )
-        break
+        );
+        break;
       default:
-        break
+        break;
     }
-    let currentBox = myPiece.parentNode
-    currentBox.innerHTML = ""
+    let currentBox = myPiece.parentNode;
+    currentBox.innerHTML = "";
 
     for (let j = 0; j < piecePossibleMoves.length; j++) {
-      let possibleMove = piecePossibleMoves[j] ///////OVDE JE i NA POCETKU NAPISAO, a rasi pise j
-      let boxToMove = document.getElementById(possibleMove.id)
-      let removedPiece = null
+      let possibleMove = piecePossibleMoves[j];
+      let boxToMove = document.getElementById(possibleMove.id);
+      let removedPiece = null;
       if (boxToMove.children.length > 0) {
-        removedPiece = boxToMove.children[0]
+        removedPiece = boxToMove.children[0];
       }
-      boxToMove.innerHTML = ""
+      boxToMove.innerHTML = "";
 
-      boxToMove.appendChild(myPiece)
+      boxToMove.appendChild(myPiece);
 
-      let check = isCheck(enemyKingPosition)
+      let check = isCheck(enemyKingPosition);
 
-      boxToMove.innerHTML = ""
+      boxToMove.innerHTML = "";
 
       if (removedPiece) {
-        boxToMove.appendChild(removedPiece)
+        boxToMove.appendChild(removedPiece);
       }
       if (!check) {
-        currentBox.appendChild(myPiece)
-        switchPlayerAndEnemy()
-        return false
+        currentBox.appendChild(myPiece);
+        switchPlayerAndEnemy();
+        return false;
       }
     }
-    currentBox.appendChild(myPiece)
+    currentBox.appendChild(myPiece);
   }
-  switchPlayerAndEnemy()
+  switchPlayerAndEnemy();
 
   if (kingPossibleMoves.length === 0) {
-    return true
+    return true;
   }
 
-  return false
-}
+  return false;
+};
 
 const getKingPosition = (pieceColor) => {
-  let pieces = document.querySelectorAll(`.piece.${pieceColor}`)
+  let pieces = document.querySelectorAll(`.piece.${pieceColor}`);
 
   for (let i = 0; i < pieces.length; i++) {
     if (pieces[i].dataset.piece === "king") {
       //vracamo id polja na tabli na kome se nalazi king
-      return pieces[i].parentNode.id
+      return pieces[i].parentNode.id;
     }
   }
-}
+};
 
 const isPawnAtTheEndOfTheBoard = (currentPlayer, pawnPosition) => {
-  let isAtTheEndOfBoard = false
+  let isAtTheEndOfBoard = false;
 
-  let positionIndex
+  let positionIndex;
 
   if (currentPlayer === "light") {
     positionIndex = lightPiecesEndingPosition.findIndex(
       (pos) => pos === pawnPosition
-    )
+    );
 
     //ako smo pronasli index
     if (positionIndex !== -1) {
-      isAtTheEndOfBoard = true
+      isAtTheEndOfBoard = true;
     }
   } else {
     positionIndex = blackPiecesEndingPosition.findIndex(
       (pos) => pos === pawnPosition
-    )
+    );
 
     //ako smo pronasli index
     if (positionIndex !== -1) {
-      isAtTheEndOfBoard = true
+      isAtTheEndOfBoard = true;
     }
   }
 
-  return isAtTheEndOfBoard
-}
+  return isAtTheEndOfBoard;
+};
